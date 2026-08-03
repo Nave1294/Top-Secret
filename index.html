@@ -17,33 +17,37 @@
       // --- The event ---
       // Use a full ISO date-time with timezone offset so the countdown is exact.
       // Format: "YYYY-MM-DDTHH:MM:SS-04:00"  (-04:00 = Eastern Daylight, -05:00 = Eastern Standard)
-      dateTimeISO: "2026-09-19T17:00:00-04:00",
-      dateLabel:  "Saturday, September 19th, 2026",   // shown to guests
-      timeLabel:  "5:00 PM – 9:00 PM",
+      dateTimeISO: "",                 // ⚠️ TODO: no date given yet — countdown hides until set
+      dateLabel:  "",                  // ⚠️ TODO: e.g. "Saturday, October 17th, 2026"
+      timeLabel:  "6:30 PM – 11:30 PM",
+      // Optional second line under the time. Leave "" to hide.
+      timeNote:   "The newly engaged couple arrives around 7:30",
 
       // --- The venue ---
-      venueName:  "The Rose Garden Loft",
-      venueAddr:  "123 Celebration Ave, Philadelphia, PA 19103",
+      venueName:  "",                  // optional venue name — leave "" to show just the address
+      venueAddr:  "1220 North Front Street, Philadelphia, PA",
       // Optional: a Google Maps link. Leave "" to auto-build one from venueAddr.
       mapUrl:     "",
 
       // --- Details ---
-      hostLine:   "Hosted with love by the Rivera & Chen families",
-      dressCode:  "Cocktail attire",
-      note:       "Come celebrate as we begin this next chapter together. " +
-                  "There will be drinks, dancing, and far too many hors d'oeuvres.",
+      hostLine:   "",                  // optional, e.g. "Hosted with love by the ___ families"
+      dressCode:  "",                  // optional — leave "" to hide the Attire row
+      // Optional extra rows. Leave "" to hide either one.
+      foodLine:   "Light dinner will be provided",
+      parkingLine: "Street parking only — please carpool or take transit if you can",
+      note:       "Come celebrate with us as we begin this next chapter together.",
       registryUrl: "",   // optional — leave "" to hide the registry button
 
       // --- RSVP delivery ---------------------------------------------------
       // Option A (recommended): paste your Google Apps Script Web App URL here.
-      //   RSVPs get appended to a Google Sheet you own. See rsvp/README.md.
+      //   RSVPs get appended to a Google Sheet you own. See README.md.
       // Option B: leave it "" — the form falls back to opening the guest's
       //   email app addressed to rsvpEmail below (works with zero setup).
       rsvpEndpoint: "",
       rsvpEmail:    "you@example.com",   // used for the mailto fallback
 
       // RSVP deadline (shown to guests; optional — leave "" to hide)
-      rsvpBy:     "September 1st",
+      rsvpBy:     "",                  // ⚠️ TODO: set once the party date is decided
     };
   </script>
   <!-- =================================================================== -->
@@ -372,9 +376,17 @@
         <svg class="detail-ico" viewBox="0 0 24 24"><path d="M12 21s-7-5.2-7-11a7 7 0 0114 0c0 5.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
         <div><div class="detail-k">Where</div><div class="detail-v" id="whereV">—</div></div>
       </div>
-      <div class="detail-row">
+      <div class="detail-row" id="attireRow">
         <svg class="detail-ico" viewBox="0 0 24 24"><path d="M20.4 14.5 16 10 4 22"/><path d="M14 6l4 4"/><circle cx="17.5" cy="6.5" r="3.5"/></svg>
         <div><div class="detail-k">Attire</div><div class="detail-v" id="attireV">—</div></div>
+      </div>
+      <div class="detail-row" id="foodRow">
+        <svg class="detail-ico" viewBox="0 0 24 24"><path d="M4 3v8a3 3 0 003 3v7"/><path d="M7 3v6"/><path d="M10 3v6"/><path d="M17 3c-1.5 2-2 4-2 7h4c0-3-.5-5-2-7z"/><path d="M17 10v11"/></svg>
+        <div><div class="detail-k">Food</div><div class="detail-v" id="foodV">—</div></div>
+      </div>
+      <div class="detail-row" id="parkingRow">
+        <svg class="detail-ico" viewBox="0 0 24 24"><path d="M5 17h14"/><path d="M6 17V9.5L7.5 6h9L18 9.5V17"/><circle cx="8" cy="14" r="1.2"/><circle cx="16" cy="14" r="1.2"/><path d="M6 17v2M18 17v2"/></svg>
+        <div><div class="detail-k">Getting there</div><div class="detail-v" id="parkingV">—</div></div>
       </div>
     </section>
 
@@ -465,17 +477,36 @@
       document.title = `${C.partner1} & ${C.partner2} — You're Invited`;
       $("p1").textContent = C.partner1;
       $("p2").textContent = C.partner2;
-      $("dateLine").textContent = C.dateLabel;
-      $("whenV").innerHTML = `${escapeHtml(C.dateLabel)}<br>${escapeHtml(C.timeLabel)}`;
+
+      // Date line in the hero only shows if a date has been set.
+      $("dateLine").textContent = C.dateLabel || "";
+      $("dateLine").hidden = !C.dateLabel;
+
+      // "When" row: date (if set), time, and the optional arrival note.
+      $("whenV").innerHTML = [
+        C.dateLabel ? escapeHtml(C.dateLabel) : "",
+        escapeHtml(C.timeLabel),
+        C.timeNote ? `<span style="color:var(--text-secondary);font-style:italic">${escapeHtml(C.timeNote)}</span>` : "",
+      ].filter(Boolean).join("<br>");
 
       const mapUrl = C.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(C.venueAddr)}`;
       $("whereV").innerHTML =
-        `<strong>${escapeHtml(C.venueName)}</strong><br>` +
+        (C.venueName ? `<strong>${escapeHtml(C.venueName)}</strong><br>` : "") +
         `<a href="${mapUrl}" target="_blank" rel="noopener">${escapeHtml(C.venueAddr)}</a>`;
 
-      $("attireV").textContent = C.dressCode;
+      // Optional rows — each hides itself when its config field is blank.
+      setRow("attireRow", "attireV", C.dressCode);
+      setRow("foodRow", "foodV", C.foodLine);
+      setRow("parkingRow", "parkingV", C.parkingLine);
+
       $("noteV").textContent = C.note;
-      $("hostV").textContent = C.hostLine;
+      $("hostV").textContent = C.hostLine || "";
+      $("hostV").hidden = !C.hostLine;
+
+      function setRow(rowId, valId, value) {
+        if (value) $(valId).textContent = value;
+        else $(rowId).hidden = true;
+      }
 
       if (C.rsvpBy) $("deadlineV").textContent = `Please reply by ${C.rsvpBy}`;
 
