@@ -383,7 +383,16 @@
       text-decoration: none; display: block; text-align: center;
     }
     .submit-btn:hover { background: var(--accent); }
-    .submit-btn:disabled { opacity: 0.6; cursor: default; }
+    .submit-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    /* keep the hover colour from firing while it is disabled */
+    .submit-btn:disabled:hover { background: var(--accent-dp); }
+
+    /* shown only while the pledge is unchecked */
+    .submit-hint {
+      text-align: center; font-size: 0.82rem; line-height: 1.5;
+      color: var(--alert); margin-top: 0.65rem;
+    }
+    .submit-hint[hidden] { display: none; }
 
     .deadline { text-align: center; font-size: 0.82rem; color: var(--text-tertiary); margin-top: 1rem; }
 
@@ -582,7 +591,8 @@
           <span id="pledgeText">I'll keep this to myself — I won't share the link or discuss the party, and Ilona won't hear it from me.</span>
         </label>
 
-        <button type="submit" class="submit-btn" id="submitBtn">Send RSVP</button>
+        <button type="submit" class="submit-btn" id="submitBtn" disabled>Send RSVP</button>
+        <p class="submit-hint" id="submitHint">Please check the box above to send your RSVP.</p>
         <div class="err" id="formErr"></div>
         <div class="deadline" id="deadlineV"></div>
       </form>
@@ -691,6 +701,15 @@
         $("rsvpForm").hidden = true;
       }
 
+      // The send button stays disabled until the secrecy pledge is ticked.
+      const pledgeBox = $("pledge");
+      const syncPledge = () => {
+        $("submitBtn").disabled = !pledgeBox.checked;
+        $("submitHint").hidden = pledgeBox.checked;
+      };
+      pledgeBox.addEventListener("change", syncPledge);
+      syncPledge();   // also covers a browser restoring a checked box on reload
+
       document.querySelectorAll('input[name="attending"]').forEach((r) => {
         r.addEventListener("change", () => {
           const accepting = document.querySelector('input[name="attending"]:checked').value.startsWith("Joyfully");
@@ -788,8 +807,8 @@
           }
           showSuccess(data);
         } catch (err) {
-          btn.disabled = false;
           btn.textContent = "Send RSVP";
+          syncPledge();
           showErr("Something went wrong sending your RSVP. Please try again, or give us a call.");
         }
       });
