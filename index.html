@@ -7,15 +7,13 @@
   <style>
     :root {
       --cream:      #f6f2e6;
-      --cream-2:    #fffdf6;
       --ink:        #23301f;
       --ink-soft:   #5c6a54;
-      --ink-faint:  #93a08b;
+      --ink-faint:  #8f9a86;
       --green:      #2f6b45;
       --green-dp:   #234f34;
       --brass:      #9a8c52;
-      --alert:      #a4552c;
-      --line:       rgba(47, 107, 69, 0.18);
+      --line:       rgba(47, 107, 69, 0.22);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -24,10 +22,7 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-      background:
-        radial-gradient(60rem 42rem at 50% -8%, rgba(47,107,69,0.09), transparent 62%),
-        radial-gradient(52rem 40rem at 12% 100%, rgba(154,140,82,0.10), transparent 60%),
-        var(--cream);
+      background: var(--cream);
       color: var(--ink);
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
@@ -35,28 +30,44 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 3rem 1.25rem 3.5rem;
+      padding: 3.2rem 1.5rem 4rem;
       text-align: center;
     }
 
     .serif { font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif; }
 
-    .wrap { max-width: 660px; width: 100%; }
+    .wrap { max-width: 30rem; width: 100%; display: flex; flex-direction: column; align-items: center; }
+
+    /* ---- Photo ---- */
+    .photo-frame {
+      width: min(300px, 62vw);
+      aspect-ratio: 4 / 5;
+      border: 1px solid var(--line);
+      padding: 6px;
+      margin-bottom: 2.1rem;
+    }
+    .photo-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 42%;
+      display: block;
+      filter: saturate(0.94) contrast(1.02);
+    }
 
     .eyebrow {
-      font-size: clamp(0.58rem, 2.3vw, 0.7rem);
+      font-size: 0.66rem;
       font-weight: 600;
       letter-spacing: 0.4em;
       text-transform: uppercase;
       color: var(--brass);
-      margin-bottom: 1.6rem;
+      margin-bottom: 1.3rem;
     }
 
     /* ---- Wordmark ---- */
     h1 {
       font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
-      font-size: clamp(3rem, 15vw, 6.6rem);
+      font-size: clamp(2.6rem, 13vw, 5.4rem);
       line-height: 0.95;
       font-weight: 600;
       letter-spacing: 0.01em;
@@ -66,9 +77,9 @@
     h1 .l2 { display: block; letter-spacing: 0.05em; color: var(--green); }
 
     .flourish {
-      width: min(300px, 70%);
+      width: min(260px, 60%);
       height: 1px;
-      margin: 1.8rem auto 1.5rem;
+      margin: 1.6rem auto;
       background: linear-gradient(90deg, transparent, var(--brass), transparent);
       position: relative;
     }
@@ -78,122 +89,92 @@
       transform: translate(-50%, -50%);
       background: var(--cream);
       color: var(--brass);
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       padding: 0 0.55rem;
     }
 
     .tagline {
       font-style: italic;
-      font-size: clamp(1.02rem, 3.7vw, 1.24rem);
+      font-size: clamp(1rem, 3.6vw, 1.18rem);
       color: var(--ink-soft);
       margin-bottom: 1.9rem;
     }
 
-    /* ---- Discretion notice ---- */
+    /* ---- Discretion note: plain typography, no box ---- */
     .notice {
-      margin: 0 auto;
-      max-width: 32rem;
-      background: var(--cream-2);
-      border: 1px solid var(--line);
-      border-left: 3px solid var(--alert);
-      border-radius: 14px;
-      padding: 1.25rem 1.35rem;
-      text-align: left;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.03), 0 14px 38px rgba(47,107,69,0.07);
-    }
-    .notice .hd {
-      font-size: 0.68rem;
-      font-weight: 700;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--alert);
-      margin-bottom: 0.6rem;
-    }
-    .notice p {
-      font-size: 0.96rem;
-      line-height: 1.62;
+      max-width: 27rem;
+      font-size: 0.97rem;
+      line-height: 1.7;
       color: var(--ink-soft);
     }
-    .notice p + p { margin-top: 0.6rem; }
     .notice strong { color: var(--ink); font-weight: 600; }
+    .notice-rule {
+      width: 34px; height: 1px;
+      background: var(--line);
+      margin: 1.15rem auto;
+    }
 
     /* ---- Envelope ----
-       Roomy top padding so the flap can swing open without hitting the text. */
+       No negative margins: the top padding here is real, reserved layout
+       space, so the opening flap has somewhere to go that never reaches
+       the text above it. */
     .envelope-link {
-      display: inline-block;
+      display: block;
       text-decoration: none;
       color: inherit;
-      border-radius: 18px;
-      padding: 5.5rem 0.75rem 0.75rem;
-      margin-top: -2rem;
+      margin-top: 2.4rem;
+      padding-top: 3.4rem;
+    }
+    .envelope-link:focus-visible { outline: 2px solid var(--green); outline-offset: 8px; border-radius: 6px; }
+
+    .env-stage {
+      perspective: 1100px;
       transition: transform 0.35s cubic-bezier(.2,.8,.3,1);
     }
-    .envelope-link:hover, .envelope-link:focus-visible { transform: translateY(-7px); }
-    .envelope-link:focus-visible { outline: 2px solid var(--green); outline-offset: 6px; }
-    .envelope-link:active { transform: translateY(-3px) scale(0.985); }
+    .envelope-link:hover .env-stage,
+    .envelope-link:focus-visible .env-stage { transform: translateY(-6px); }
+    .envelope-link:active .env-stage { transform: translateY(-2px) scale(0.99); }
 
     .env {
-      width: min(320px, 72vw);
+      width: min(272px, 62vw);
       height: auto;
       overflow: visible;
-      filter: drop-shadow(0 18px 30px rgba(35,48,31,0.18));
+      display: block;
+      margin: 0 auto;
+      filter: drop-shadow(0 16px 26px rgba(35,48,31,0.16));
     }
 
     .letter {
-      transform: translateY(30px);
+      transform: translateY(26px);
       transition: transform 0.5s cubic-bezier(.2,.8,.3,1);
     }
     .envelope-link:hover .letter,
-    .envelope-link:focus-visible .letter { transform: translateY(-34px); }
+    .envelope-link:focus-visible .letter { transform: translateY(-26px); }
 
     .flap-g {
       transform-box: fill-box;
       transform-origin: 50% 0%;
-      transition: transform 0.55s cubic-bezier(.3,.7,.3,1);
-      will-change: transform;
+      transition: transform 0.5s cubic-bezier(.3,.7,.3,1);
     }
     .envelope-link:hover .flap-g,
-    .envelope-link:focus-visible .flap-g { transform: rotateX(-165deg); }
+    .envelope-link:focus-visible .flap-g { transform: rotateX(-148deg); }
 
-    .seal { transition: opacity 0.25s ease 0.05s; }
+    .seal { transition: opacity 0.2s ease; }
     .envelope-link:hover .seal,
     .envelope-link:focus-visible .seal { opacity: 0; }
 
-    .cta {
-      margin-top: 1.9rem;
-      font-size: 0.74rem;
-      font-weight: 700;
-      letter-spacing: 0.26em;
-      text-transform: uppercase;
-      color: var(--green);
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
-    .cta .arrow { transition: transform 0.3s ease; }
-    .envelope-link:hover .cta .arrow,
-    .envelope-link:focus-visible .cta .arrow { transform: translateX(5px); }
-
-    .pulse {
-      display: block;
-      margin-top: 0.8rem;
-      font-size: 0.8rem;
-      color: var(--ink-faint);
-      font-style: italic;
-      font-family: 'Iowan Old Style', Palatino, Georgia, serif;
-      text-transform: none;
-      font-weight: 400;
-      letter-spacing: 0.01em;
-    }
-
     @media (prefers-reduced-motion: reduce) {
-      .envelope-link, .letter, .flap-g, .seal, .cta .arrow { transition: none !important; }
-      .envelope-link:hover { transform: none; }
+      .envelope-link, .env-stage, .letter, .flap-g, .seal { transition: none !important; }
+      .envelope-link:hover .env-stage { transform: none; }
     }
   </style>
 </head>
 <body>
   <main class="wrap">
+    <div class="photo-frame">
+      <img src="assets/couple-mountain.jpg" alt="Evan and Ilona">
+    </div>
+
     <div class="eyebrow">Strictly Confidential</div>
 
     <h1>Top<span class="l2">Secret</span></h1>
@@ -201,71 +182,66 @@
     <div class="flourish"></div>
     <p class="tagline serif">Something worth celebrating is happening&hellip;</p>
 
-    <div class="notice">
-      <div class="hd">A word of discretion</div>
-      <p>
-        This is a <strong>surprise</strong>. Ilona knows nothing about it, and
-        won't until she walks through the door.
-      </p>
-      <p>
-        <strong>Please don't share this link, and please don't discuss the party
-        with anyone.</strong> The fewer people who know, the better the odds it
-        stays a secret &mdash; so keep it between you and the hosts.
-      </p>
-    </div>
+    <p class="notice">
+      This is a <strong>surprise</strong> for someone very special &mdash;
+      they have no idea, and it needs to stay that way.
+    </p>
+    <div class="notice-rule"></div>
+    <p class="notice">
+      <strong>Please don't share this link, and please don't discuss it with
+      anyone.</strong> The smaller the circle who knows, the better the odds
+      it stays a secret.
+    </p>
 
     <a class="envelope-link" href="invite.html" aria-label="Open your invitation">
-      <svg class="env" viewBox="0 0 340 232" role="img" aria-hidden="true" style="perspective:900px">
-        <defs>
-          <linearGradient id="paperG" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stop-color="#fffdf4"/>
-            <stop offset="100%" stop-color="#eee9d5"/>
-          </linearGradient>
-          <linearGradient id="flapG" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stop-color="#fffef8"/>
-            <stop offset="100%" stop-color="#e4dec6"/>
-          </linearGradient>
-          <linearGradient id="letterG" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stop-color="#ffffff"/>
-            <stop offset="100%" stop-color="#f1f6ee"/>
-          </linearGradient>
-          <linearGradient id="sealG" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%"   stop-color="#3f8557"/>
-            <stop offset="100%" stop-color="#234f34"/>
-          </linearGradient>
-        </defs>
+      <div class="env-stage">
+        <svg class="env" viewBox="0 0 340 232" role="img" aria-hidden="true">
+          <defs>
+            <linearGradient id="paperG" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stop-color="#fffdf4"/>
+              <stop offset="100%" stop-color="#eee9d5"/>
+            </linearGradient>
+            <linearGradient id="flapG" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stop-color="#fffef8"/>
+              <stop offset="100%" stop-color="#e4dec6"/>
+            </linearGradient>
+            <linearGradient id="letterG" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stop-color="#ffffff"/>
+              <stop offset="100%" stop-color="#f1f6ee"/>
+            </linearGradient>
+            <linearGradient id="sealG" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%"   stop-color="#3f8557"/>
+              <stop offset="100%" stop-color="#234f34"/>
+            </linearGradient>
+          </defs>
 
-        <rect x="10" y="40" width="320" height="182" rx="12" fill="#ded8bf"/>
+          <rect x="10" y="40" width="320" height="182" rx="10" fill="#ded8bf"/>
 
-        <g class="letter">
-          <rect x="46" y="18" width="248" height="150" rx="8" fill="url(#letterG)"/>
-          <text x="170" y="66" text-anchor="middle" font-family="Georgia, serif" font-style="italic"
-                font-size="17" fill="#2f6b45">You&#8217;re invited</text>
-          <rect x="104" y="92"  width="132" height="6" rx="3" fill="#e3ebe0"/>
-          <rect x="118" y="110" width="104" height="6" rx="3" fill="#e9efe6"/>
-        </g>
+          <g class="letter">
+            <rect x="46" y="18" width="248" height="150" rx="6" fill="url(#letterG)"/>
+            <text x="170" y="66" text-anchor="middle" font-family="Georgia, serif" font-style="italic"
+                  font-size="17" fill="#2f6b45">You&#8217;re invited</text>
+            <rect x="104" y="92"  width="132" height="6" rx="3" fill="#e3ebe0"/>
+            <rect x="118" y="110" width="104" height="6" rx="3" fill="#e9efe6"/>
+          </g>
 
-        <path d="M10 52 L170 158 L330 52 L330 210 A12 12 0 0 1 318 222 L22 222 A12 12 0 0 1 10 210 Z"
-              fill="url(#paperG)"/>
-        <path d="M10 210 L118 132 M330 210 L222 132" stroke="#d3cdb2" stroke-width="1.5" fill="none" opacity="0.9"/>
+          <path d="M10 52 L170 158 L330 52 L330 210 A10 10 0 0 1 320 222 L20 222 A10 10 0 0 1 10 210 Z"
+                fill="url(#paperG)"/>
+          <path d="M10 210 L118 132 M330 210 L222 132" stroke="#d3cdb2" stroke-width="1.5" fill="none" opacity="0.9"/>
 
-        <g class="flap-g">
-          <path d="M22 40 L318 40 A12 12 0 0 1 330 52 L170 158 L10 52 A12 12 0 0 1 22 40 Z"
-                fill="url(#flapG)" stroke="#d9d3ba" stroke-width="1"/>
-        </g>
+          <g class="flap-g">
+            <path d="M20 40 L320 40 A10 10 0 0 1 330 52 L170 158 L10 52 A10 10 0 0 1 20 40 Z"
+                  fill="url(#flapG)" stroke="#d9d3ba" stroke-width="1"/>
+          </g>
 
-        <g class="seal">
-          <circle cx="170" cy="150" r="25" fill="url(#sealG)"/>
-          <circle cx="170" cy="150" r="19" fill="none" stroke="#bfe0c9" stroke-width="1" opacity="0.5"/>
-          <text x="170" y="158" text-anchor="middle" font-family="Georgia, serif"
-                font-size="20" font-style="italic" fill="#f0f8f2">&amp;</text>
-        </g>
-      </svg>
-
-      <div class="cta">
-        Open the invitation <span class="arrow">&rarr;</span>
+          <g class="seal">
+            <circle cx="170" cy="150" r="24" fill="url(#sealG)"/>
+            <circle cx="170" cy="150" r="18" fill="none" stroke="#bfe0c9" stroke-width="1" opacity="0.5"/>
+            <text x="170" y="158" text-anchor="middle" font-family="Georgia, serif"
+                  font-size="19" font-style="italic" fill="#f0f8f2">&amp;</text>
+          </g>
+        </svg>
       </div>
-      <span class="pulse">tap the envelope</span>
     </a>
   </main>
 </body>
