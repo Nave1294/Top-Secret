@@ -107,6 +107,21 @@
 
     .container { width: 100%; max-width: 34rem; }
 
+    /* On desktop the container itself widens so photo bands can run full
+       width, while the reading column stays narrow and centered inside it.
+       (Widening the container beats negative-margin breakouts: percentage
+       margins resolve against the flex containing block, not the column,
+       which throws the bands off-centre.) */
+    @media (min-width: 1024px) {
+      .container { max-width: 56rem; }
+      .hero, section, footer, .back-link {
+        display: block;
+        max-width: 40rem;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    }
+
     .serif { font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Georgia', serif; }
 
     /* ---- Discretion bar ---- */
@@ -198,19 +213,32 @@
     }
     .cd-sep { color: var(--line); font-size: 1.4rem; align-self: flex-start; margin-top: 0.15rem; }
 
-    /* ---------- Photo band ---------- */
-    .photo-band {
-      margin: 2.6rem 0;
+    /* ---------- Photo bands ---------- */
+    .band { display: grid; gap: 10px; margin: 2.8rem 0; grid-template-columns: 1fr; }
+    .band figure {
+      margin: 0;
+      aspect-ratio: 4 / 5;
       border: 1px solid var(--line-soft);
-      padding: 6px;
+      padding: 5px;
+      overflow: hidden;
     }
-    .photo-band img {
+    .band img {
       display: block;
       width: 100%;
-      max-height: 24rem;
+      height: 100%;
       object-fit: cover;
-      object-position: center 30%;
       filter: saturate(0.94) contrast(1.02);
+    }
+
+    /* Mobile keeps one photo per band; the rest are desktop-only so the
+       page stays short on a phone. */
+    .band-2 { display: none; }
+    @media (max-width: 1023px) {
+      .band .wide-only { display: none; }
+    }
+    @media (min-width: 1024px) {
+      .band-3 { grid-template-columns: repeat(3, 1fr); }
+      .band-2 { display: grid; grid-template-columns: repeat(2, 1fr); }
     }
 
     /* ---------- Sections: rule dividers, no boxes ---------- */
@@ -423,8 +451,10 @@
       </div>
     </header>
 
-    <div class="photo-band">
-      <img src="assets/couple-ferry.jpg" alt="Evan and Ilona">
+    <div class="band band-3">
+      <figure><img src="assets/couple-ferry.jpg" alt="Evan and Ilona" style="object-position:center 35%"></figure>
+      <figure class="wide-only"><img src="assets/couple-mountain.jpg" alt="Evan and Ilona" style="object-position:center 45%"></figure>
+      <figure class="wide-only"><img src="assets/couple-timessq.jpg" alt="Evan and Ilona" style="object-position:center 30%"></figure>
     </div>
 
     <!-- DISCRETION -->
@@ -476,6 +506,11 @@
     <section>
       <p class="note-text serif" id="noteV">—</p>
     </section>
+
+    <div class="band band-2">
+      <figure><img src="assets/couple-waterfall.jpg" alt="Evan and Ilona" style="object-position:center 40%"></figure>
+      <figure><img src="assets/couple-bean.jpg" alt="Evan and Ilona" style="object-position:center 55%"></figure>
+    </div>
 
     <!-- FAQ -->
     <section>
