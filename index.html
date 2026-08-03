@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>You're Invited</title>
+
+  <!-- =================================================================== -->
+  <!--  ✏️  EDIT EVERYTHING IN THIS CONFIG BLOCK — that's all you need.     -->
+  <!-- =================================================================== -->
+  <script>
+    const CONFIG = {
+      // --- The couple ---
+      partner1:   "Alex",
+      partner2:   "Sam",
+
+      // --- The event ---
+      // Use a full ISO date-time with timezone offset so the countdown is exact.
+      // Format: "YYYY-MM-DDTHH:MM:SS-04:00"  (-04:00 = Eastern Daylight, -05:00 = Eastern Standard)
+      dateTimeISO: "2026-09-19T17:00:00-04:00",
+      dateLabel:  "Saturday, September 19th, 2026",   // shown to guests
+      timeLabel:  "5:00 PM – 9:00 PM",
+
+      // --- The venue ---
+      venueName:  "The Rose Garden Loft",
+      venueAddr:  "123 Celebration Ave, Philadelphia, PA 19103",
+      // Optional: a Google Maps link. Leave "" to auto-build one from venueAddr.
+      mapUrl:     "",
+
+      // --- Details ---
+      hostLine:   "Hosted with love by the Rivera & Chen families",
+      dressCode:  "Cocktail attire",
+      note:       "Come celebrate as we begin this next chapter together. " +
+                  "There will be drinks, dancing, and far too many hors d'oeuvres.",
+      registryUrl: "",   // optional — leave "" to hide the registry button
+
+      // --- RSVP delivery ---------------------------------------------------
+      // Option A (recommended): paste your Google Apps Script Web App URL here.
+      //   RSVPs get appended to a Google Sheet you own. See rsvp/README.md.
+      // Option B: leave it "" — the form falls back to opening the guest's
+      //   email app addressed to rsvpEmail below (works with zero setup).
+      rsvpEndpoint: "",
+      rsvpEmail:    "you@example.com",   // used for the mailto fallback
+
+      // RSVP deadline (shown to guests; optional — leave "" to hide)
+      rsvpBy:     "September 1st",
+    };
+  </script>
+  <!-- =================================================================== -->
+
+  <style>
+    [hidden] { display: none !important; }
+    :root {
+      --bg:            #fbf3f1;
+      --surface:       #fffaf7;
+      --text:          #3a2b2e;
+      --text-secondary:#8a6f74;
+      --text-tertiary: #b9a0a4;
+      --accent:        #8c3b52;   /* deep rose */
+      --accent-soft:   #f3dfe2;
+      --gold:          #b78a4e;
+      --divider:       rgba(140, 59, 82, 0.12);
+      --shadow:        0 1px 3px rgba(0,0,0,0.04), 0 12px 40px rgba(140,59,82,0.08);
+      --radius:        20px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { background: var(--bg); scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background:
+        radial-gradient(60rem 40rem at 80% -10%, rgba(183,138,78,0.10), transparent 60%),
+        radial-gradient(50rem 40rem at -10% 20%, rgba(140,59,82,0.10), transparent 55%),
+        var(--bg);
+      min-height: 100vh;
+      padding: 3rem 1.25rem 4rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container { width: 100%; max-width: 640px; }
+
+    .serif { font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Georgia', serif; }
+
+    /* ---------- Hero ---------- */
+    .hero { text-align: center; margin-bottom: 2.75rem; }
+
+    .eyebrow {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.4rem;
+    }
+
+    .names {
+      font-size: clamp(2.6rem, 11vw, 4.2rem);
+      line-height: 1.02;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--accent);
+    }
+    .amp {
+      display: block;
+      font-size: clamp(1.6rem, 6vw, 2.2rem);
+      font-style: italic;
+      color: var(--gold);
+      margin: 0.35rem 0;
+      font-weight: 400;
+    }
+
+    .subtitle {
+      margin-top: 1.5rem;
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+    .date-line {
+      margin-top: 0.4rem;
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .divider {
+      width: 60px;
+      height: 1px;
+      margin: 1.6rem auto;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      position: relative;
+    }
+    .divider::after {
+      content: "❦";
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--bg);
+      color: var(--gold);
+      font-size: 0.9rem;
+      padding: 0 0.5rem;
+    }
+
+    /* ---------- Countdown ---------- */
+    .countdown {
+      display: flex;
+      justify-content: center;
+      gap: 0.6rem;
+      margin: 2rem 0 0.5rem;
+    }
+    .cd-cell {
+      background: var(--surface);
+      border: 1px solid var(--divider);
+      border-radius: 14px;
+      padding: 0.85rem 0.5rem;
+      min-width: 68px;
+      box-shadow: var(--shadow);
+    }
+    .cd-num {
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .cd-lbl {
+      font-size: 0.62rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-top: 0.4rem;
+    }
+
+    /* ---------- Cards ---------- */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--divider);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .card h2 {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.1rem;
+    }
+
+    .detail-row {
+      display: flex;
+      gap: 0.9rem;
+      padding: 0.7rem 0;
+      border-top: 1px solid var(--divider);
+      align-items: flex-start;
+    }
+    .detail-row:first-of-type { border-top: none; padding-top: 0; }
+    .detail-ico {
+      flex: none;
+      width: 24px; height: 24px;
+      color: var(--accent);
+      stroke: currentColor; fill: none; stroke-width: 1.7;
+    }
+    .detail-k { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-tertiary); }
+    .detail-v { font-size: 1.02rem; font-weight: 500; margin-top: 0.15rem; }
+    .detail-v a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-soft); }
+    .detail-v a:hover { border-bottom-color: var(--accent); }
+
+    .note-text {
+      font-size: 1.05rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+      text-align: center;
+      font-style: italic;
+    }
+
+    /* ---------- Form ---------- */
+    .field { margin-bottom: 1.1rem; }
+    .field label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+      margin-bottom: 0.4rem;
+    }
+    .field .req { color: var(--accent); }
+    input, select, textarea {
+      width: 100%;
+      font: inherit;
+      font-size: 1rem;
+      color: var(--text);
+      background: #fff;
+      border: 1px solid var(--divider);
+      border-radius: 12px;
+      padding: 0.7rem 0.85rem;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    textarea { resize: vertical; min-height: 80px; }
+
+    .choice-row { display: flex; gap: 0.6rem; }
+    .choice {
+      flex: 1;
+      position: relative;
+      cursor: pointer;
+    }
+    .choice input { position: absolute; opacity: 0; pointer-events: none; }
+    .choice span {
+      display: block;
+      text-align: center;
+      padding: 0.75rem;
+      border: 1.5px solid var(--divider);
+      border-radius: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      transition: all 0.15s ease;
+      background: #fff;
+    }
+    .choice input:checked + span {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+    .choice:hover span { border-color: var(--accent); }
+
+    .submit-btn {
+      width: 100%;
+      font: inherit;
+      font-size: 1.02rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #fff;
+      background: var(--accent);
+      border: none;
+      border-radius: 999px;
+      padding: 0.95rem;
+      cursor: pointer;
+      margin-top: 0.4rem;
+      box-shadow: 0 8px 22px rgba(140,59,82,0.28);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    }
+    .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 12px 28px rgba(140,59,82,0.34); }
+    .submit-btn:active { transform: scale(0.985); }
+    .submit-btn:disabled { opacity: 0.6; cursor: default; transform: none; }
+
+    .deadline { text-align: center; font-size: 0.82rem; color: var(--text-tertiary); margin-top: 0.9rem; }
+
+    /* dietary field hidden until "attending" chosen */
+    #attendingExtras { display: none; }
+    #attendingExtras.show { display: block; }
+
+    /* Success state */
+    .success {
+      text-align: center;
+      padding: 1.5rem 0.5rem;
+    }
+    .success .checkmark {
+      width: 64px; height: 64px;
+      margin: 0 auto 1.1rem;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      display: grid; place-items: center;
+    }
+    .success .checkmark svg { width: 30px; height: 30px; stroke: var(--accent); stroke-width: 2.5; fill: none; }
+    .success h3 { font-size: 1.5rem; color: var(--accent); margin-bottom: 0.5rem; }
+    .success p { color: var(--text-secondary); line-height: 1.6; }
+
+    .registry-btn {
+      display: inline-block;
+      margin-top: 0.4rem;
+      font-weight: 600;
+      color: var(--gold);
+      text-decoration: none;
+      border: 1.5px solid var(--gold);
+      border-radius: 999px;
+      padding: 0.6rem 1.4rem;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .registry-btn:hover { background: var(--gold); color: #fff; }
+
+    footer { text-align: center; margin-top: 2.5rem; color: var(--text-tertiary); font-size: 0.82rem; }
+    footer .host { font-style: italic; margin-bottom: 0.4rem; color: var(--text-secondary); }
+
+    .err { color: var(--accent); font-size: 0.82rem; margin-top: 0.5rem; text-align: center; display: none; }
+    .err.show { display: block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- HERO -->
+    <header class="hero">
+      <div class="eyebrow">Together with their families</div>
+      <h1 class="names serif">
+        <span id="p1">Alex</span>
+        <span class="amp serif">&amp;</span>
+        <span id="p2">Sam</span>
+      </h1>
+      <p class="subtitle serif">are getting engaged — and you're invited!</p>
+      <p class="date-line" id="dateLine">Saturday, September 19th, 2026</p>
+
+      <div class="divider"></div>
+
+      <div class="countdown" id="countdown" aria-label="Countdown to the party">
+        <div class="cd-cell"><div class="cd-num" id="cdD">–</div><div class="cd-lbl">Days</div></div>
+        <div class="cd-cell"><div class="cd-num" id="cdH">–</div><div class="cd-lbl">Hours</div></div>
+        <div class="cd-cell"><div class="cd-num" id="cdM">–</div><div class="cd-lbl">Min</div></div>
+        <div class="cd-cell"><div class="cd-num" id="cdS">–</div><div class="cd-lbl">Sec</div></div>
+      </div>
+    </header>
+
+    <!-- DETAILS -->
+    <section class="card">
+      <h2>The Details</h2>
+      <div class="detail-row">
+        <svg class="detail-ico" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>
+        <div><div class="detail-k">When</div><div class="detail-v" id="whenV">—</div></div>
+      </div>
+      <div class="detail-row">
+        <svg class="detail-ico" viewBox="0 0 24 24"><path d="M12 21s-7-5.2-7-11a7 7 0 0114 0c0 5.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        <div><div class="detail-k">Where</div><div class="detail-v" id="whereV">—</div></div>
+      </div>
+      <div class="detail-row">
+        <svg class="detail-ico" viewBox="0 0 24 24"><path d="M20.4 14.5 16 10 4 22"/><path d="M14 6l4 4"/><circle cx="17.5" cy="6.5" r="3.5"/></svg>
+        <div><div class="detail-k">Attire</div><div class="detail-v" id="attireV">—</div></div>
+      </div>
+    </section>
+
+    <!-- NOTE -->
+    <section class="card">
+      <p class="note-text serif" id="noteV">—</p>
+    </section>
+
+    <!-- RSVP FORM -->
+    <section class="card" id="rsvpCard">
+      <h2>Kindly Reply</h2>
+      <form id="rsvpForm" novalidate>
+        <div class="field">
+          <label for="name">Your name <span class="req">*</span></label>
+          <input type="text" id="name" name="name" autocomplete="name" required>
+        </div>
+
+        <div class="field">
+          <label for="email">Email <span class="req">*</span></label>
+          <input type="email" id="email" name="email" autocomplete="email" required>
+        </div>
+
+        <div class="field">
+          <label>Will you be joining us? <span class="req">*</span></label>
+          <div class="choice-row">
+            <label class="choice">
+              <input type="radio" name="attending" value="Joyfully accepts" required>
+              <span>Joyfully accepts</span>
+            </label>
+            <label class="choice">
+              <input type="radio" name="attending" value="Regretfully declines">
+              <span>Regretfully declines</span>
+            </label>
+          </div>
+        </div>
+
+        <div id="attendingExtras">
+          <div class="field">
+            <label for="guests">Number of guests (including you)</label>
+            <select id="guests" name="guests">
+              <option value="1">Just me</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5+</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="dietary">Dietary restrictions or allergies</label>
+            <input type="text" id="dietary" name="dietary" placeholder="Vegetarian, gluten-free, none…">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="message">A note for the couple</label>
+          <textarea id="message" name="message" placeholder="Congratulations, can't wait, etc."></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">Send RSVP</button>
+        <div class="err" id="formErr"></div>
+        <div class="deadline" id="deadlineV"></div>
+      </form>
+
+      <!-- Success state (hidden until submit) -->
+      <div class="success" id="successState" hidden>
+        <div class="checkmark"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
+        <h3 class="serif">Thank you!</h3>
+        <p id="successMsg">Your RSVP is in. We can't wait to celebrate with you.</p>
+        <div id="registryWrap" hidden style="margin-top:1.2rem">
+          <a class="registry-btn" id="registryLink" target="_blank" rel="noopener">View the registry</a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="host" id="hostV">—</div>
+      <div>With love &amp; gratitude</div>
+    </footer>
+
+  </div>
+
+  <script>
+    (function () {
+      const $ = (id) => document.getElementById(id);
+      const C = CONFIG;
+
+      // ---- Populate content ----
+      document.title = `${C.partner1} & ${C.partner2} — You're Invited`;
+      $("p1").textContent = C.partner1;
+      $("p2").textContent = C.partner2;
+      $("dateLine").textContent = C.dateLabel;
+      $("whenV").innerHTML = `${escapeHtml(C.dateLabel)}<br>${escapeHtml(C.timeLabel)}`;
+
+      const mapUrl = C.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(C.venueAddr)}`;
+      $("whereV").innerHTML =
+        `<strong>${escapeHtml(C.venueName)}</strong><br>` +
+        `<a href="${mapUrl}" target="_blank" rel="noopener">${escapeHtml(C.venueAddr)}</a>`;
+
+      $("attireV").textContent = C.dressCode;
+      $("noteV").textContent = C.note;
+      $("hostV").textContent = C.hostLine;
+
+      if (C.rsvpBy) $("deadlineV").textContent = `Please reply by ${C.rsvpBy}`;
+
+      if (C.registryUrl) {
+        $("registryLink").href = C.registryUrl;
+        $("registryWrap").hidden = false;
+      }
+
+      // ---- Show dietary/guests only when accepting ----
+      document.querySelectorAll('input[name="attending"]').forEach((r) => {
+        r.addEventListener("change", () => {
+          const accepting = document.querySelector('input[name="attending"]:checked').value.startsWith("Joyfully");
+          $("attendingExtras").classList.toggle("show", accepting);
+        });
+      });
+
+      // ---- Countdown ----
+      const target = new Date(C.dateTimeISO).getTime();
+      function tick() {
+        const diff = target - Date.now();
+        if (isNaN(target)) { $("countdown").hidden = true; return; }
+        if (diff <= 0) {
+          $("cdD").textContent = $("cdH").textContent = $("cdM").textContent = $("cdS").textContent = "0";
+          $("countdown").setAttribute("aria-label", "The celebration is here!");
+          return;
+        }
+        const d = Math.floor(diff / 86400000);
+        const h = Math.floor((diff % 86400000) / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        $("cdD").textContent = d;
+        $("cdH").textContent = String(h).padStart(2, "0");
+        $("cdM").textContent = String(m).padStart(2, "0");
+        $("cdS").textContent = String(s).padStart(2, "0");
+      }
+      tick();
+      setInterval(tick, 1000);
+
+      // ---- Submit ----
+      const form = $("rsvpForm");
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        $("formErr").classList.remove("show");
+
+        const name = $("name").value.trim();
+        const email = $("email").value.trim();
+        const attendingEl = document.querySelector('input[name="attending"]:checked');
+        if (!name || !email || !attendingEl) {
+          showErr("Please fill in your name, email, and reply.");
+          return;
+        }
+
+        const data = {
+          name,
+          email,
+          attending: attendingEl.value,
+          guests: attendingEl.value.startsWith("Joyfully") ? $("guests").value : "0",
+          dietary: $("dietary").value.trim(),
+          message: $("message").value.trim(),
+          submittedAt: new Date().toISOString(),
+        };
+
+        const btn = $("submitBtn");
+        btn.disabled = true;
+        btn.textContent = "Sending…";
+
+        try {
+          if (C.rsvpEndpoint) {
+            // POST to Google Apps Script. Uses no-cors so the browser doesn't
+            // block the opaque response; Apps Script still records the row.
+            await fetch(C.rsvpEndpoint, {
+              method: "POST",
+              mode: "no-cors",
+              headers: { "Content-Type": "text/plain;charset=utf-8" },
+              body: JSON.stringify(data),
+            });
+            showSuccess(data);
+          } else {
+            // Fallback: open the guest's email client, pre-filled.
+            const subject = encodeURIComponent(`RSVP — ${data.name}`);
+            const body = encodeURIComponent(
+              `Name: ${data.name}\n` +
+              `Email: ${data.email}\n` +
+              `Reply: ${data.attending}\n` +
+              `Guests: ${data.guests}\n` +
+              `Dietary: ${data.dietary || "—"}\n` +
+              `Note: ${data.message || "—"}\n`
+            );
+            window.location.href = `mailto:${C.rsvpEmail}?subject=${subject}&body=${body}`;
+            showSuccess(data);
+          }
+        } catch (err) {
+          btn.disabled = false;
+          btn.textContent = "Send RSVP";
+          showErr("Something went wrong sending your RSVP. Please try again or email us directly.");
+        }
+      });
+
+      function showSuccess(data) {
+        form.hidden = true;
+        const accepting = data.attending.startsWith("Joyfully");
+        $("successMsg").textContent = accepting
+          ? "Your RSVP is in — we can't wait to celebrate with you!"
+          : "Thank you for letting us know. You'll be missed, and we appreciate the reply.";
+        $("registryWrap").hidden = !(accepting && C.registryUrl);
+        $("successState").hidden = false;
+      }
+
+      function showErr(msg) {
+        const el = $("formErr");
+        el.textContent = msg;
+        el.classList.add("show");
+      }
+
+      function escapeHtml(str) {
+        return String(str).replace(/[&<>"']/g, (c) => (
+          { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
+        ));
+      }
+    })();
+  </script>
+</body>
+</html>
