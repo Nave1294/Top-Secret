@@ -58,7 +58,7 @@
         { q: "Where should I park?",
           a: "Street parking only. Carpooling or taking transit will make the evening much easier." },
         { q: "Can I bring someone?",
-          a: "Only if they're already on the guest list. Please don't extend the invitation on your own — the more people who know, the more likely the surprise slips." },
+          a: "Only immediate family or significant others are permitted per invitation. Please don't extend the invitation beyond that — the more people who know, the more likely the surprise slips." },
       ],
 
       // --- RSVP delivery -------------------------------------------------
@@ -747,12 +747,33 @@
 
         try {
           if (C.rsvpEndpoint) {
-            await fetch(C.rsvpEndpoint, {
-              method: "POST",
-              mode: "no-cors",
-              headers: { "Content-Type": "text/plain;charset=utf-8" },
-              body: JSON.stringify(data),
-            });
+            // Plain CORS request (text/plain avoids a preflight). Apps Script
+            // echoes back JSON, so unlike an opaque no-cors post we can tell
+            // whether the row actually landed instead of always claiming success.
+            let confirmed = false;
+            try {
+              const res = await fetch(C.rsvpEndpoint, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify(data),
+                redirect: "follow",
+              });
+              const text = await res.text();
+              confirmed = res.ok && text.indexOf('"ok"') !== -1;
+              if (!confirmed) throw new Error("endpoint did not confirm");
+            } catch (corsErr) {
+              // Couldn't read the reply (CORS, or the script is asking for a
+              // login). Send once more opaquely so a working endpoint still
+              // records the RSVP, then report honestly that it's unconfirmed.
+              await fetch(C.rsvpEndpoint, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify(data),
+              });
+              showSuccess(data, false);
+              return;
+            }
           } else {
             const subject = encodeURIComponent(`RSVP — ${data.name}`);
             const body = encodeURIComponent(
@@ -769,12 +790,17 @@
         }
       });
 
-      function showSuccess(data) {
+      function showSuccess(data, confirmed = true) {
         form.hidden = true;
         const accepting = data.attending.startsWith("Joyfully");
         $("successMsg").textContent = accepting
           ? "Your RSVP is in — we can't wait to celebrate with you."
           : "Thank you for letting us know. You'll be missed, and we appreciate the reply.";
+        if (!confirmed) {
+          $("successMsg").innerHTML +=
+            `<br><span style="font-size:0.88rem">If you don't hear back, ` +
+            `text ${escapeHtml(C.contactName)} at ${escapeHtml(C.contactPhone)} just in case.</span>`;
+        }
         $("registryWrap").hidden = !(accepting && C.registryUrl);
         $("successState").hidden = false;
       }

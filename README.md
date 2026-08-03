@@ -29,18 +29,45 @@ the form.
 
    `submittedAt | name | email | attending | guests | dietary | message`
 
-2. **Extensions → Apps Script**, delete the placeholder, and paste:
+2. **Extensions → Apps Script** (opening it this way matters — see
+   troubleshooting), delete the placeholder, and paste this. Put your own sheet
+   ID in `SHEET_ID` (it's the long string in the sheet's URL between `/d/` and
+   `/edit`):
 
    ```javascript
+   const SHEET_ID = 'PASTE_YOUR_SHEET_ID_HERE';
+
+   function sheet_() {
+     // openById works whether or not the script is bound to the sheet.
+     return SpreadsheetApp.openById(SHEET_ID).getSheets()[0];
+   }
+
    function doPost(e) {
-     const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
-     const d = JSON.parse(e.postData.contents);
-     sheet.appendRow([
-       d.submittedAt, d.name, d.email,
-       d.attending, d.guests, d.dietary, d.message
-     ]);
+     try {
+       const d = JSON.parse(e.postData.contents);
+       sheet_().appendRow([
+         d.submittedAt, d.name, d.email,
+         d.attending, d.guests, d.dietary, d.message
+       ]);
+       return json_({ ok: true });
+     } catch (err) {
+       return json_({ ok: false, error: String(err) });
+     }
+   }
+
+   // Visit the /exec URL in a browser to check the deployment is healthy.
+   function doGet() {
+     try {
+       const rows = sheet_().getLastRow();
+       return json_({ ok: true, status: 'reachable', rowsSoFar: rows });
+     } catch (err) {
+       return json_({ ok: false, error: String(err) });
+     }
+   }
+
+   function json_(obj) {
      return ContentService
-       .createTextOutput(JSON.stringify({ ok: true }))
+       .createTextOutput(JSON.stringify(obj))
        .setMimeType(ContentService.MimeType.JSON);
    }
    ```
@@ -49,11 +76,37 @@ the form.
    - *Execute as:* **Me**
    - *Who has access:* **Anyone**
 
-   ("Anyone" lets the page submit without guests needing to log in. It only
-   grants access to the script's `doPost` — **not** to the spreadsheet.)
+   "Anyone" lets the page submit without guests logging in. It exposes only the
+   script's `doPost`/`doGet` — **not** the spreadsheet.
+
+   The first deploy will prompt you to authorize the script. You must complete
+   that (including the "Advanced → Go to project (unsafe)" screen, which appears
+   because the script is unpublished and yours). Until it's authorized, the
+   script cannot write to the sheet.
 
 4. Copy the Web app URL (it ends in `/exec`) and paste it into
    `CONFIG.rsvpEndpoint` in `invite.html`.
+
+### If RSVPs aren't reaching the sheet
+
+**Open the `/exec` URL directly in a browser tab.** What you see identifies the
+problem immediately:
+
+| What you see | What it means | Fix |
+|---|---|---|
+| `{"ok":true,"status":"reachable",…}` | Working correctly | Nothing — submit a test RSVP |
+| A Google **sign-in page** | Access isn't public | Redeploy with *Who has access:* **Anyone** |
+| `{"ok":false,"error":"…"}` | Script runs but can't reach the sheet | Check `SHEET_ID` is correct |
+| **"Script function not found: doGet"** | An older version is deployed | **Deploy → Manage deployments → Edit → Version: New version** |
+
+Two traps worth knowing:
+
+- **`getActiveSpreadsheet()` returns `null`** in a standalone script (one made at
+  script.google.com rather than from *Extensions → Apps Script* inside the
+  sheet). The script above avoids this entirely by using `openById`.
+- **Editing the code does not update the live URL.** Apps Script serves the
+  deployed *version*, so after any edit you must go to
+  **Deploy → Manage deployments → Edit (pencil) → Version: New version → Deploy.**
 
 > **Keep the sheet itself private.** In the Sheet's **Share** dialog, General
 > access should stay **Restricted**. Don't put an "anyone with the link" sheet
