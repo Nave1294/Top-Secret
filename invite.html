@@ -24,8 +24,12 @@
       dateLabel:  "Friday, September 18th, 2026",
       timeLabel:  "6:30 PM – 11:30 PM",
       // The hard cutoff — guests must be inside before the couple arrives.
+      doorsOpen:     "6:30 PM",
       arriveBy:      "7:15 PM",
       coupleArrives: "7:30 PM",
+      // If someone can't make the cutoff, this is when it's safe to walk in
+      // (i.e. once the surprise has already happened).
+      lateArrivalAfter: "7:45 PM",
 
       // --- The venue ---
       venueName:  "",                  // optional — leave "" to show just the address
@@ -47,6 +51,8 @@
 
       // --- FAQ --- add/remove freely; each is { q, a }
       faq: [
+        { q: "What if I'm running late?",
+          a: "Please don't walk in between {arriveBy} and {lateArrivalAfter} — that's the window when {secretName} arrives and the surprise happens. If you can't make it by {arriveBy}, wait and come after {lateArrivalAfter}, once the surprise is over, and text {contactName} at {contactPhone} so we know to look out for you." },
         { q: "Is there a bar?",
           a: "It's BYOB — please bring whatever you'd like to drink." },
         { q: "Will we be inside or outside?",
@@ -180,6 +186,7 @@
       letter-spacing: 0.02em;
     }
     .date-line { margin-top: 0.5rem; font-size: 1.12rem; font-weight: 600; }
+    .time-line { margin-top: 0.25rem; font-size: 1rem; color: var(--text-secondary); }
 
     .flourish {
       width: 52px; height: 1px;
@@ -446,6 +453,7 @@
       <h1 class="names serif" id="namesLine">Evan <span class="amp">&amp;</span> Ilona</h1>
       <p class="subtitle serif">Engagement Party</p>
       <p class="date-line" id="dateLine"></p>
+      <p class="time-line" id="timeLine"></p>
 
       <div class="flourish"></div>
 
@@ -647,14 +655,17 @@
         `party to anyone. The smaller the circle, the better the surprise.`;
 
       $("arrivalV").innerHTML =
-        `You <strong>must</strong> arrive by <strong>${escapeHtml(C.arriveBy)}</strong>. ` +
+        `The venue is available from <strong>${escapeHtml(C.doorsOpen)}</strong>. ` +
+        `You <strong>must</strong> arrive by <strong>${escapeHtml(C.arriveBy)}</strong> — ` +
         `${escapeHtml(C.partner1)} and ${escapeHtml(SECRET)} arrive around ` +
         `${escapeHtml(C.coupleArrives)}, and anyone walking in after them risks giving it ` +
-        `away — so please don't be late.`;
+        `away, so please don't be late.`;
 
       // ---- Date / time ----
       $("dateLine").textContent = C.dateLabel || "";
       $("dateLine").hidden = !C.dateLabel;
+      $("timeLine").textContent = C.timeLabel || "";
+      $("timeLine").hidden = !C.timeLabel;
 
       $("whenV").innerHTML = [
         C.dateLabel ? escapeHtml(C.dateLabel) : "",
@@ -681,10 +692,15 @@
       if (C.registryUrl) $("registryLink").href = C.registryUrl;
 
       // ---- FAQ ----
+      // {tokens} in FAQ text are filled from CONFIG so times, names and the
+      // phone number are never duplicated by hand.
+      const fill = (t) => String(t).replace(/\{(\w+)\}/g, (m, k) =>
+        k === "secretName" ? SECRET : (C[k] !== undefined ? C[k] : m));
+
       $("faqList").innerHTML = (C.faq || []).map((f) => `
         <details class="faq-item">
-          <summary>${escapeHtml(f.q)}</summary>
-          <div class="a">${escapeHtml(f.a)}</div>
+          <summary>${escapeHtml(fill(f.q))}</summary>
+          <div class="a">${escapeHtml(fill(f.a))}</div>
         </details>`).join("");
 
       // ---- Contact ----
