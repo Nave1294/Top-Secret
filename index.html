@@ -6,13 +6,16 @@
   <title>Top Secret</title>
   <style>
     :root {
-      --ink:      #0c1710;
-      --paper:    #f4f0e0;
-      --sage:     #3f7d52;
-      --sage-lt:  #5a9c6c;
-      --gold:     #b9c4a0;
-      --gold-lt:  #e8e6c4;
-      --alert:    #cf6a4a;
+      --cream:      #f6f2e6;
+      --cream-2:    #fffdf6;
+      --ink:        #23301f;
+      --ink-soft:   #5c6a54;
+      --ink-faint:  #93a08b;
+      --green:      #2f6b45;
+      --green-dp:   #234f34;
+      --brass:      #9a8c52;
+      --alert:      #a4552c;
+      --line:       rgba(47, 107, 69, 0.18);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -22,135 +25,120 @@
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
       background:
-        radial-gradient(70rem 50rem at 50% 8%,  rgba(185,196,160,0.18), transparent 62%),
-        radial-gradient(60rem 45rem at 15% 95%, rgba(63,125,82,0.28), transparent 60%),
-        var(--ink);
-      color: var(--paper);
+        radial-gradient(60rem 42rem at 50% -8%, rgba(47,107,69,0.09), transparent 62%),
+        radial-gradient(52rem 40rem at 12% 100%, rgba(154,140,82,0.10), transparent 60%),
+        var(--cream);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
       min-height: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 2.5rem 1.25rem 3rem;
+      padding: 3rem 1.25rem 3.5rem;
       text-align: center;
-      overflow-x: hidden;
     }
 
-    body::after {
-      content: "";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      opacity: 0.5;
-      mix-blend-mode: overlay;
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/></filter><rect width='140' height='140' filter='url(%23n)' opacity='0.35'/></svg>");
-    }
+    .serif { font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif; }
 
-    .wrap { position: relative; z-index: 1; max-width: 680px; width: 100%; }
+    .wrap { max-width: 660px; width: 100%; }
 
     .eyebrow {
-      font-size: clamp(0.6rem, 2.4vw, 0.72rem);
-      font-weight: 700;
-      letter-spacing: 0.42em;
+      font-size: clamp(0.58rem, 2.3vw, 0.7rem);
+      font-weight: 600;
+      letter-spacing: 0.4em;
       text-transform: uppercase;
-      color: var(--gold);
-      opacity: 0.9;
-      margin-bottom: 1.4rem;
+      color: var(--brass);
+      margin-bottom: 1.6rem;
     }
 
+    /* ---- Wordmark ---- */
     h1 {
-      font-size: clamp(3.2rem, 17vw, 8.5rem);
-      line-height: 0.9;
-      font-weight: 800;
-      letter-spacing: 0.02em;
+      font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+      font-size: clamp(3rem, 15vw, 6.6rem);
+      line-height: 0.95;
+      font-weight: 600;
+      letter-spacing: 0.01em;
       text-transform: uppercase;
-      background: linear-gradient(175deg, #fffdf0 8%, var(--gold-lt) 42%, var(--gold) 72%, #6f7a4a 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 3px 14px rgba(185,196,160,0.30));
-      margin-bottom: 0.15rem;
+      color: var(--green-dp);
     }
-    h1 .l2 { display: block; letter-spacing: 0.06em; }
+    h1 .l2 { display: block; letter-spacing: 0.05em; color: var(--green); }
 
-    /* ---- The surprise warning: the whole point of the page ---- */
-    .classified-stamp {
-      display: inline-block;
-      margin: 1.5rem 0 0.25rem;
-      border: 2.5px solid var(--alert);
-      color: var(--alert);
-      border-radius: 6px;
-      padding: 0.5rem 1rem;
-      font-size: clamp(0.62rem, 2.6vw, 0.78rem);
-      font-weight: 800;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      transform: rotate(-2.5deg);
-      opacity: 0.95;
-      text-shadow: 0 0 12px rgba(207,106,74,0.28);
-    }
-
-    .warning {
-      margin: 1.5rem auto 0;
-      max-width: 30rem;
-      border: 1px solid rgba(207,106,74,0.42);
-      background: rgba(207,106,74,0.10);
-      border-radius: 14px;
-      padding: 1.1rem 1.2rem;
-    }
-    .warning .big {
-      font-size: clamp(1.02rem, 4vw, 1.2rem);
-      font-weight: 700;
-      color: #f6ece2;
-      line-height: 1.4;
-      margin-bottom: 0.5rem;
-    }
-    .warning .big em { color: var(--alert); font-style: normal; }
-    .warning .small {
-      font-size: 0.87rem;
-      line-height: 1.55;
-      color: #cbbfa8;
-    }
-
-    .rule {
-      width: min(340px, 76%);
+    .flourish {
+      width: min(300px, 70%);
       height: 1px;
-      margin: 1.7rem auto 1.35rem;
-      background: linear-gradient(90deg, transparent, rgba(185,196,160,0.75), transparent);
+      margin: 1.8rem auto 1.5rem;
+      background: linear-gradient(90deg, transparent, var(--brass), transparent);
+      position: relative;
+    }
+    .flourish::after {
+      content: "❦";
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--cream);
+      color: var(--brass);
+      font-size: 0.95rem;
+      padding: 0 0.55rem;
     }
 
     .tagline {
-      font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
       font-style: italic;
-      font-size: clamp(1rem, 3.6vw, 1.22rem);
-      color: #cdd2bc;
+      font-size: clamp(1.02rem, 3.7vw, 1.24rem);
+      color: var(--ink-soft);
+      margin-bottom: 1.9rem;
     }
 
+    /* ---- Discretion notice ---- */
+    .notice {
+      margin: 0 auto;
+      max-width: 32rem;
+      background: var(--cream-2);
+      border: 1px solid var(--line);
+      border-left: 3px solid var(--alert);
+      border-radius: 14px;
+      padding: 1.25rem 1.35rem;
+      text-align: left;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03), 0 14px 38px rgba(47,107,69,0.07);
+    }
+    .notice .hd {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--alert);
+      margin-bottom: 0.6rem;
+    }
+    .notice p {
+      font-size: 0.96rem;
+      line-height: 1.62;
+      color: var(--ink-soft);
+    }
+    .notice p + p { margin-top: 0.6rem; }
+    .notice strong { color: var(--ink); font-weight: 600; }
+
     /* ---- Envelope ----
-       Generous top padding leaves room for the flap to swing open
-       without colliding with the text above it. */
+       Roomy top padding so the flap can swing open without hitting the text. */
     .envelope-link {
       display: inline-block;
       text-decoration: none;
       color: inherit;
       border-radius: 18px;
       padding: 5.5rem 0.75rem 0.75rem;
-      margin-top: -3rem;
+      margin-top: -2rem;
       transition: transform 0.35s cubic-bezier(.2,.8,.3,1);
     }
-    .envelope-link:hover, .envelope-link:focus-visible { transform: translateY(-8px); }
-    .envelope-link:focus-visible { outline: 2px solid var(--gold); outline-offset: 6px; }
+    .envelope-link:hover, .envelope-link:focus-visible { transform: translateY(-7px); }
+    .envelope-link:focus-visible { outline: 2px solid var(--green); outline-offset: 6px; }
     .envelope-link:active { transform: translateY(-3px) scale(0.985); }
 
     .env {
-      width: min(330px, 74vw);
+      width: min(320px, 72vw);
       height: auto;
       overflow: visible;
-      filter: drop-shadow(0 26px 40px rgba(0,0,0,0.5));
+      filter: drop-shadow(0 18px 30px rgba(35,48,31,0.18));
     }
 
-    /* Letter sits fully tucked inside the pocket until the flap opens. */
     .letter {
       transform: translateY(30px);
       transition: transform 0.5s cubic-bezier(.2,.8,.3,1);
@@ -172,12 +160,12 @@
     .envelope-link:focus-visible .seal { opacity: 0; }
 
     .cta {
-      margin-top: 2rem;
-      font-size: 0.76rem;
+      margin-top: 1.9rem;
+      font-size: 0.74rem;
       font-weight: 700;
-      letter-spacing: 0.28em;
+      letter-spacing: 0.26em;
       text-transform: uppercase;
-      color: var(--gold);
+      color: var(--green);
       display: inline-flex;
       align-items: center;
       gap: 0.6rem;
@@ -188,24 +176,14 @@
 
     .pulse {
       display: block;
-      margin-top: 0.85rem;
-      font-size: 0.78rem;
-      color: #8d9179;
+      margin-top: 0.8rem;
+      font-size: 0.8rem;
+      color: var(--ink-faint);
       font-style: italic;
       font-family: 'Iowan Old Style', Palatino, Georgia, serif;
       text-transform: none;
       font-weight: 400;
-      letter-spacing: 0.02em;
-    }
-
-    .footer-secret {
-      margin-top: 2.4rem;
-      font-size: 0.8rem;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      font-weight: 700;
-      color: var(--alert);
-      opacity: 0.85;
+      letter-spacing: 0.01em;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -216,80 +194,79 @@
 </head>
 <body>
   <main class="wrap">
-    <div class="eyebrow">Classified &middot; For Your Eyes Only</div>
+    <div class="eyebrow">Strictly Confidential</div>
 
     <h1>Top<span class="l2">Secret</span></h1>
 
-    <div class="classified-stamp">Do Not Tell Ilona</div>
+    <div class="flourish"></div>
+    <p class="tagline serif">Something worth celebrating is happening&hellip;</p>
 
-    <div class="warning">
-      <p class="big">This is a <em>surprise</em>. Ilona has no idea &mdash;<br>and won't until she walks in.</p>
-      <p class="small">
-        No posts, no stories, no tags, no group chats. If you see her before the
-        party, you know nothing. Keep it locked.
+    <div class="notice">
+      <div class="hd">A word of discretion</div>
+      <p>
+        This is a <strong>surprise</strong>. Ilona knows nothing about it, and
+        won't until she walks through the door.
+      </p>
+      <p>
+        <strong>Please don't share this link, and please don't discuss the party
+        with anyone.</strong> The fewer people who know, the better the odds it
+        stays a secret &mdash; so keep it between you and the hosts.
       </p>
     </div>
 
-    <div class="rule"></div>
-    <p class="tagline">Something worth celebrating is happening&hellip;</p>
-
-    <a class="envelope-link" href="invite.html" aria-label="Open your secret invitation">
+    <a class="envelope-link" href="invite.html" aria-label="Open your invitation">
       <svg class="env" viewBox="0 0 340 232" role="img" aria-hidden="true" style="perspective:900px">
         <defs>
           <linearGradient id="paperG" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stop-color="#fbf8ea"/>
-            <stop offset="100%" stop-color="#e6e2c8"/>
+            <stop offset="0%"   stop-color="#fffdf4"/>
+            <stop offset="100%" stop-color="#eee9d5"/>
           </linearGradient>
           <linearGradient id="flapG" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stop-color="#f7f3e2"/>
-            <stop offset="100%" stop-color="#d8d3b4"/>
+            <stop offset="0%"   stop-color="#fffef8"/>
+            <stop offset="100%" stop-color="#e4dec6"/>
           </linearGradient>
           <linearGradient id="letterG" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%"   stop-color="#ffffff"/>
-            <stop offset="100%" stop-color="#eef4ea"/>
+            <stop offset="100%" stop-color="#f1f6ee"/>
           </linearGradient>
           <linearGradient id="sealG" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%"   stop-color="#4e8f63"/>
-            <stop offset="100%" stop-color="#2c6340"/>
+            <stop offset="0%"   stop-color="#3f8557"/>
+            <stop offset="100%" stop-color="#234f34"/>
           </linearGradient>
         </defs>
 
-        <rect x="10" y="40" width="320" height="182" rx="12" fill="#d5d0b2"/>
+        <rect x="10" y="40" width="320" height="182" rx="12" fill="#ded8bf"/>
 
         <g class="letter">
           <rect x="46" y="18" width="248" height="150" rx="8" fill="url(#letterG)"/>
-          <text x="170" y="60" text-anchor="middle" font-family="Georgia, serif" font-style="italic"
-                font-size="16" fill="#2f6b45">You&#8217;re invited</text>
-          <text x="170" y="82" text-anchor="middle" font-family="-apple-system, Helvetica, sans-serif"
-                font-size="9" font-weight="bold" letter-spacing="1.6" fill="#c05a3c">SHHH&#8230;</text>
-          <rect x="104" y="100" width="132" height="6" rx="3" fill="#ece0e5"/>
-          <rect x="118" y="118" width="104" height="6" rx="3" fill="#ece0e5"/>
+          <text x="170" y="66" text-anchor="middle" font-family="Georgia, serif" font-style="italic"
+                font-size="17" fill="#2f6b45">You&#8217;re invited</text>
+          <rect x="104" y="92"  width="132" height="6" rx="3" fill="#e3ebe0"/>
+          <rect x="118" y="110" width="104" height="6" rx="3" fill="#e9efe6"/>
         </g>
 
         <path d="M10 52 L170 158 L330 52 L330 210 A12 12 0 0 1 318 222 L22 222 A12 12 0 0 1 10 210 Z"
               fill="url(#paperG)"/>
-        <path d="M10 210 L118 132 M330 210 L222 132" stroke="#c6c2a4" stroke-width="1.5" fill="none" opacity="0.8"/>
+        <path d="M10 210 L118 132 M330 210 L222 132" stroke="#d3cdb2" stroke-width="1.5" fill="none" opacity="0.9"/>
 
         <g class="flap-g">
           <path d="M22 40 L318 40 A12 12 0 0 1 330 52 L170 158 L10 52 A12 12 0 0 1 22 40 Z"
-                fill="url(#flapG)" stroke="#cfcaa8" stroke-width="1"/>
+                fill="url(#flapG)" stroke="#d9d3ba" stroke-width="1"/>
         </g>
 
         <g class="seal">
           <circle cx="170" cy="150" r="25" fill="url(#sealG)"/>
-          <circle cx="170" cy="150" r="19" fill="none" stroke="#a9d6b6" stroke-width="1" opacity="0.45"/>
+          <circle cx="170" cy="150" r="19" fill="none" stroke="#bfe0c9" stroke-width="1" opacity="0.5"/>
           <text x="170" y="158" text-anchor="middle" font-family="Georgia, serif"
-                font-size="20" font-style="italic" fill="#eaf7ee">&amp;</text>
+                font-size="20" font-style="italic" fill="#f0f8f2">&amp;</text>
         </g>
       </svg>
 
       <div class="cta">
         Open the invitation <span class="arrow">&rarr;</span>
       </div>
-      <span class="pulse">tap the envelope &mdash; then keep it to yourself</span>
+      <span class="pulse">tap the envelope</span>
     </a>
-
-    <p class="footer-secret">🤫 Operation: Keep It Quiet</p>
   </main>
 </body>
 </html>
