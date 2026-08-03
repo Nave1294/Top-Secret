@@ -20,8 +20,8 @@
       // --- The event ---
       // Use a full ISO date-time with timezone offset so the countdown is exact.
       // Format: "YYYY-MM-DDTHH:MM:SS-04:00"  (-04:00 = Eastern Daylight, -05:00 = Eastern Standard)
-      dateTimeISO: "",                 // ⚠️ TODO: no date given yet — countdown hides until set
-      dateLabel:  "",                  // ⚠️ TODO: e.g. "Saturday, October 17th, 2026"
+      dateTimeISO: "2026-09-18T18:30:00-04:00",
+      dateLabel:  "Friday, September 18th, 2026",
       timeLabel:  "6:30 PM – 11:30 PM",
       // The critical one for a surprise — when guests must be in the room.
       arriveBy:   "7:15 PM",
@@ -48,11 +48,11 @@
       // Option B: leave rsvpFormUrl blank to use the built-in form below.
       //   Paste a Google Apps Script Web App URL to log RSVPs to a Sheet
       //   (see README.md), or leave it blank to fall back to email.
-      rsvpEndpoint: "",
-      rsvpEmail:    "you@example.com", // ⚠️ TODO: used for the mailto fallback
+      rsvpEndpoint: "",               // ⚠️ TODO: paste your Apps Script /exec URL — see README.md
+      rsvpEmail:    "you@example.com", // ⚠️ TODO: used only if rsvpEndpoint is blank
 
       // RSVP deadline (shown to guests; optional — leave "" to hide)
-      rsvpBy:     "",                  // ⚠️ TODO: set once the party date is decided
+      rsvpBy:     "September 4th",
     };
   </script>
   <!-- =================================================================== -->

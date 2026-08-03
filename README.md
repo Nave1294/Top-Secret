@@ -1,33 +1,34 @@
-# Engagement Party RSVP
+# Top Secret — Engagement Party Invitation
 
-A single-file, self-contained RSVP site for an engagement party. No build step,
-no framework, no backend to run — just an `index.html` you host on GitHub Pages
-(or anywhere static).
+A two-page, self-contained static site. No build step, no framework, no server.
 
-Once GitHub Pages is enabled, it's live at:
+| File | What it is |
+|---|---|
+| `index.html` | The **TOP SECRET** landing page — big wordmark, surprise warning, and an envelope that opens and links through |
+| `invite.html` | The invitation itself — details, countdown, and the RSVP form |
 
-```
-https://<your-github-username>.github.io/Top-Secret/
-```
+Live at `https://<your-github-username>.github.io/Top-Secret/` once Pages is on.
 
-## 1. Fill in your details
+## Editing the details
 
-Everything you need to edit is in the **`CONFIG` block at the top of
-`index.html`** — the couple's names, date/time, venue, dress code, the note,
-registry link, RSVP deadline. Nothing else in the file needs touching.
+Everything is in the **`CONFIG` block at the top of `invite.html`** — names,
+date, venue, times, food, parking, dress code, RSVP settings. Nothing else needs
+touching.
 
-The field that drives the countdown clock is `dateTimeISO` — use a full ISO
-timestamp with the correct timezone offset (`-04:00` = Eastern Daylight Time,
-`-05:00` = Eastern Standard Time).
+`secretName` drives every piece of the "don't tell her" messaging, so changing
+it once updates the whole site.
 
-## 2. Choose how RSVPs reach you
+## RSVPs → your Google Sheet (guests never see the sheet)
 
-### Option A — Google Sheet (recommended)
+This is the setup the site ships with. Guests fill in the form on the page; a
+Google Apps Script appends each reply to your private sheet. **Guests never see
+the spreadsheet, the guest list, or anyone else's RSVP** — they only ever see
+the form.
 
-RSVPs append to a Google Sheet you own. One-time setup:
+1. Open your Google Sheet. In the first row add these headers, in this order:
 
-1. Create a new Google Sheet. In the first row add these headers (order matters):
    `submittedAt | name | email | attending | guests | dietary | message`
+
 2. **Extensions → Apps Script**, delete the placeholder, and paste:
 
    ```javascript
@@ -47,22 +48,30 @@ RSVPs append to a Google Sheet you own. One-time setup:
 3. **Deploy → New deployment → Web app.**
    - *Execute as:* **Me**
    - *Who has access:* **Anyone**
-4. Copy the Web app URL (ends in `/exec`) and paste it into
-   `CONFIG.rsvpEndpoint` in `index.html`.
 
-Submissions then land in the sheet in real time. (The page posts with
-`mode: "no-cors"`, so there's no CORS to fight; Apps Script records the row
-regardless.)
+   ("Anyone" lets the page submit without guests needing to log in. It only
+   grants access to the script's `doPost` — **not** to the spreadsheet.)
 
-### Option B — Email fallback (zero setup)
+4. Copy the Web app URL (it ends in `/exec`) and paste it into
+   `CONFIG.rsvpEndpoint` in `invite.html`.
 
-Leave `CONFIG.rsvpEndpoint` as `""` and set `CONFIG.rsvpEmail` to your address.
-The **Send RSVP** button opens the guest's email app pre-filled with their
-answers — they just hit send, and you tally replies in your inbox.
+> **Keep the sheet itself private.** In the Sheet's **Share** dialog, General
+> access should stay **Restricted**. Don't put an "anyone with the link" sheet
+> URL on the site — that would expose the whole guest list, which for a surprise
+> party is the one thing you can't afford to leak.
 
-## 3. Go live on GitHub Pages
+### Alternatives
 
-In the repo: **Settings → Pages → Build and deployment**, set *Source* to
-**Deploy from a branch**, branch **main** / **/(root)**, and save. Give it a
-minute and your RSVP site is live at the URL above. (`.nojekyll` is included so
-Pages serves the files as-is.)
+- **A Google Form instead:** put the form's URL in `CONFIG.rsvpFormUrl` and the
+  RSVP card becomes a button that opens it. Responses feed a sheet you own, and
+  guests still can't see each other's answers.
+- **Email only (zero setup):** leave `rsvpEndpoint` blank and set
+  `CONFIG.rsvpEmail`. The button opens the guest's mail app pre-filled.
+
+## Go live on GitHub Pages
+
+**Settings → Pages → Build and deployment** → Source: **Deploy from a branch**,
+branch **main**, folder **/ (root)**, Save. `.nojekyll` is already included.
+
+Note that a Pages site is public to anyone with the link — there's no password.
+Share the URL only with invited guests.
