@@ -786,33 +786,65 @@
 
         try {
           if (C.rsvpEndpoint) {
-            // Plain CORS request (text/plain avoids a preflight). Apps Script
-            // echoes back JSON, so unlike an opaque no-cors post we can tell
-            // whether the row actually landed instead of always claiming success.
+            const payload = JSON.stringify(data);
+
+            // 1) Readable CORS post, so a successful send can be *verified*
+            //    rather than assumed. Timeboxed — a request that never settles
+            //    would otherwise leave the button stuck on "Sending…".
             let confirmed = false;
             try {
-              const res = await fetch(C.rsvpEndpoint, {
-                method: "POST",
-                headers: { "Content-Type": "text/plain;charset=utf-8" },
-                body: JSON.stringify(data),
-                redirect: "follow",
-              });
+              const res = await withTimeout(
+                (signal) => fetch(C.rsvpEndpoint, {
+                  method: "POST",
+                  headers: { "Content-Type": "text/plain;charset=utf-8" },
+                  body: payload,
+                  redirect: "follow",
+                  signal,
+                }), 6000);
               const text = await res.text();
               confirmed = res.ok && text.indexOf('"ok"') !== -1;
-              if (!confirmed) throw new Error("endpoint did not confirm");
             } catch (corsErr) {
-              // Couldn't read the reply (CORS, or the script is asking for a
-              // login). Send once more opaquely so a working endpoint still
-              // records the RSVP, then report honestly that it's unconfirmed.
-              await fetch(C.rsvpEndpoint, {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "text/plain;charset=utf-8" },
-                body: JSON.stringify(data),
-              });
-              showSuccess(data, false);
-              return;
+              confirmed = false;
             }
+            if (confirmed) { showSuccess(data, true); return; }
+
+            // 2) Reply unreadable (CORS/redirect) or the attempt timed out, so
+            //    post opaquely. This is preferred over sendBeacon here because
+            //    it still *rejects* on a hard network failure — a dead endpoint
+            //    must surface as an error, not a false "sent".
+            let sent = false, stalled = false;
+            try {
+              await withTimeout(
+                (signal) => fetch(C.rsvpEndpoint, {
+                  method: "POST",
+                  mode: "no-cors",
+                  headers: { "Content-Type": "text/plain;charset=utf-8" },
+                  body: payload,
+                  signal,
+                }), 6000);
+              sent = true;
+            } catch (opaqueErr) {
+              // Timed out => request may well be in flight; anything else
+              // (DNS, refused, offline) is a genuine failure.
+              stalled = opaqueErr && opaqueErr.name === "AbortError";
+            }
+
+            // 3) Only a stall hands off to sendBeacon, which cannot hang but
+            //    also cannot report failure, so it must not mask a real error.
+            if (!sent && stalled && navigator.sendBeacon) {
+              try {
+                sent = navigator.sendBeacon(
+                  C.rsvpEndpoint,
+                  new Blob([payload], { type: "text/plain;charset=UTF-8" })
+                );
+              } catch (beaconErr) {
+                sent = false;
+              }
+            }
+
+            if (!sent) throw new Error("could not reach the RSVP endpoint");
+            showSuccess(data, false);
+            return;
           } else {
             const subject = encodeURIComponent(`RSVP — ${data.name}`);
             const body = encodeURIComponent(
@@ -829,6 +861,14 @@
         }
       });
 
+      // Gives a fetch a hard deadline. Without this a stalled request never
+      // settles and the submit button sits on "Sending…" indefinitely.
+      function withTimeout(run, ms) {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), ms);
+        return Promise.resolve(run(ctrl.signal)).finally(() => clearTimeout(timer));
+      }
+
       function showSuccess(data, confirmed = true) {
         form.hidden = true;
         const accepting = data.attending.startsWith("Joyfully");
@@ -837,8 +877,8 @@
           : "Thank you for letting us know. You'll be missed, and we appreciate the reply.";
         if (!confirmed) {
           $("successMsg").innerHTML +=
-            `<br><span style="font-size:0.88rem">If you don't hear back, ` +
-            `text ${escapeHtml(C.contactName)} at ${escapeHtml(C.contactPhone)} just in case.</span>`;
+            `<br><span style="font-size:0.88rem">If you don't hear anything back ` +
+            `from us, please get in touch just in case.</span>`;
         }
         $("registryWrap").hidden = !(accepting && C.registryUrl);
         $("successState").hidden = false;
