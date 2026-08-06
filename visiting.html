@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visiting Philadelphia</title>
+
+  <!-- =================================================================== -->
+  <!--  ✏️  Everything editable lives in this block.                        -->
+  <!-- =================================================================== -->
+  <script>
+    const VISIT = {
+      guideUrl:   "https://nave1294.github.io/Goings-On/",
+      guideName:  "Goings On",
+      venueAddr:  "1220 North Front Street",
+      venueHood:  "Fishtown",
+      nearestStop:"Front–Girard",
+
+      // Annotated walkthrough of the guide. Coordinates are in the
+      // screenshot's own pixel space (see iw/ih below), so they stay
+      // correct no matter what size the figure is displayed at.
+      tour: {
+        src: "assets/goings-on-tour.jpg",
+        iw: 780, ih: 1160,
+        alt: "The Goings On guide on a phone, with callouts",
+        points: [
+          { n:1, x:66,  y:68,  side:"left",  ly:120,
+            title:"The menu",
+            lines:["Events, food, picnic spots,","pools, bookstores, farmers","markets, arts and a map"] },
+          { n:2, x:440, y:211, side:"right", ly:250,
+            title:"Pick a category",
+            lines:["What's trending, neighborhood","favorites, breakfast, lunch,","dinner, dessert, bakeries"] },
+          { n:3, x:223, y:303, side:"left",  ly:470,
+            title:"Filter by neighborhood",
+            lines:["Useful for finding something","close to where you're staying"] },
+          { n:4, x:686, y:304, side:"right", ly:560,
+            title:"Near me",
+            lines:["Re-sorts the whole list by","what's closest to you"] },
+          { n:5, x:719, y:717, side:"right", ly:850,
+            title:"Tap any place",
+            lines:["Opens the address, price range","and a link to their website"] },
+        ]
+      },
+    };
+  </script>
+  <!-- =================================================================== -->
+
+  <style>
+    [hidden] { display: none !important; }
+    :root {
+      --bg:            #f6f2e6;
+      --text:          #23301f;
+      --text-secondary:#5c6a54;
+      --text-tertiary: #93a08b;
+      --accent:        #2f6b45;
+      --accent-dp:     #234f34;
+      --accent-soft:   #e2ecdc;
+      --brass:         #9a8c52;
+      --alert:         #a4552c;
+      --line:          rgba(47, 107, 69, 0.22);
+      --line-soft:     rgba(47, 107, 69, 0.14);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { background: var(--bg); scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background: var(--bg);
+      min-height: 100vh;
+      padding: 0 1.5rem 4.5rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container { width: 100%; max-width: 34rem; }
+
+    @media (min-width: 1024px) {
+      .container { max-width: 56rem; }
+      .hero, section, footer, .back-link {
+        display: block; max-width: 40rem; margin-left: auto; margin-right: auto;
+      }
+      /* the walkthrough section keeps its text narrow but lets the figure
+         run the full width of the container */
+      section.wide { max-width: none; }
+      section.wide > h2,
+      section.wide > p,
+      section.wide > .btn,
+      section.wide > .btn-note { max-width: 40rem; margin-left: auto; margin-right: auto; }
+    }
+
+    .serif { font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Georgia', serif; }
+
+    .secret-bar {
+      position: sticky; top: 0; z-index: 20;
+      margin: 0 -1.5rem 2rem; padding: 0.6rem 1rem;
+      background: var(--accent-dp); color: #f2f7ef;
+      text-align: center; font-size: 0.68rem; font-weight: 600;
+      letter-spacing: 0.2em; text-transform: uppercase;
+    }
+
+    .back-link {
+      display: inline-block; margin-bottom: 1.5rem; font-size: 0.8rem;
+      color: var(--text-secondary); text-decoration: none; letter-spacing: 0.04em;
+    }
+    .back-link:hover { color: var(--accent); }
+
+    /* ---------- Hero ---------- */
+    .hero { text-align: center; margin-bottom: 1rem; }
+    .eyebrow {
+      font-size: 0.7rem; font-weight: 600; letter-spacing: 0.26em;
+      text-transform: uppercase; color: var(--brass); margin-bottom: 1.2rem;
+    }
+    .hero h1 {
+      font-size: clamp(1.9rem, 8vw, 3rem); line-height: 1.12;
+      font-weight: 600; color: var(--accent-dp);
+    }
+    .hero .sub {
+      margin-top: 0.9rem; font-size: 1.02rem; color: var(--text-secondary);
+      font-style: italic; line-height: 1.6;
+    }
+    .flourish {
+      width: 52px; height: 1px; margin: 1.7rem auto;
+      background: linear-gradient(90deg, transparent, var(--brass), transparent);
+      position: relative;
+    }
+    .flourish::after {
+      content: "❦"; position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%); background: var(--bg);
+      color: var(--brass); font-size: 0.88rem; padding: 0 0.5rem;
+    }
+
+    /* ---------- Sections ---------- */
+    section { padding: 2.2rem 0; border-top: 1px solid var(--line-soft); }
+    section > h2 {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--brass); margin-bottom: 1.3rem;
+    }
+    section p { font-size: 1rem; line-height: 1.7; color: var(--text-secondary); }
+    section p + p { margin-top: 0.9rem; }
+    section p strong, li strong { color: var(--text); font-weight: 600; }
+
+    .lede {
+      font-size: 1.06rem; line-height: 1.7; color: var(--text);
+    }
+
+    /* definition-style rows */
+    .rows { margin-top: 0.4rem; }
+    .row {
+      display: grid; gap: 0.15rem;
+      padding: 0.95rem 0; border-top: 1px solid var(--line-soft);
+    }
+    .row:first-child { border-top: none; padding-top: 0; }
+    .row .k {
+      font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--text-tertiary);
+    }
+    .row .v { font-size: 1rem; line-height: 1.65; color: var(--text-secondary); }
+    .row .v strong { color: var(--text); font-weight: 600; }
+
+    ul.plain { list-style: none; display: grid; gap: 0.7rem; margin-top: 0.5rem; }
+    ul.plain li {
+      display: flex; gap: 0.7rem; align-items: flex-start;
+      font-size: 0.98rem; line-height: 1.6; color: var(--text-secondary);
+    }
+    ul.plain li::before { content: "—"; flex: none; color: var(--brass); font-weight: 700; }
+    ul.plain li > span { flex: 1; }
+
+    .callout {
+      margin-top: 1.3rem; padding: 1rem 0;
+      border-top: 1px solid rgba(164,85,44,0.3); border-bottom: 1px solid rgba(164,85,44,0.3);
+    }
+    .callout .k {
+      font-size: 0.64rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--alert); font-weight: 700; margin-bottom: 0.4rem;
+    }
+    .callout .v { font-size: 1rem; line-height: 1.6; color: var(--text); }
+
+    /* ---------- Guide walkthrough ---------- */
+    .tour-wrap { margin: 0.5rem 0 0; }
+    .tour-svg { display: block; width: 100%; height: auto; }
+    .tour-svg .lead { stroke: var(--brass); stroke-width: 2; fill: none; vector-effect: non-scaling-stroke; }
+    .tour-svg .dot  { fill: var(--accent-dp); }
+    .tour-svg .ring { fill: none; stroke: var(--accent-dp); stroke-width: 3.5; opacity: 0.9; }
+    .tour-svg .dotn { fill: #fff; font-weight: 700; }
+    .tour-svg .ltitle { fill: var(--accent-dp); font-weight: 700; }
+    .tour-svg .lbody  { fill: #5c6a54; }
+    .tour-svg image { }
+
+    /* numbered legend, used on narrow screens */
+    .legend { list-style: none; display: grid; gap: 1rem; margin-top: 1.6rem; }
+    .legend li { display: flex; gap: 0.85rem; align-items: flex-start; }
+    .legend .num {
+      flex: none; width: 26px; height: 26px; border-radius: 50%;
+      background: var(--accent-dp); color: #fff;
+      font-size: 0.78rem; font-weight: 700;
+      display: grid; place-items: center; margin-top: 0.1rem;
+    }
+    .legend .t { font-weight: 600; color: var(--text); }
+    .legend .d { font-size: 0.95rem; line-height: 1.6; color: var(--text-secondary); margin-top: 0.15rem; }
+
+    .btn {
+      display: block; width: 100%; text-align: center;
+      margin-top: 1.8rem;
+      font-size: 1rem; font-weight: 700; letter-spacing: 0.03em;
+      text-transform: uppercase; color: #fff; background: var(--accent-dp);
+      border-radius: 3px; padding: 0.95rem; text-decoration: none;
+      transition: background 0.15s ease;
+    }
+    .btn:hover { background: var(--accent); }
+    .btn-note { text-align: center; font-size: 0.85rem; color: var(--text-tertiary); margin-top: 0.8rem; }
+
+    a.inline { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-soft); }
+    a.inline:hover { border-bottom-color: var(--accent); }
+
+    footer {
+      text-align: center; margin-top: 3rem; padding-top: 2.2rem;
+      border-top: 1px solid var(--line-soft); color: var(--text-tertiary); font-size: 0.82rem;
+    }
+    footer .final-secret {
+      margin-top: 1rem; font-weight: 600; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--alert); font-size: 0.7rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="secret-bar">Strictly confidential</div>
+
+    <a class="back-link" href="invite.html">&larr; Back to the invitation</a>
+
+    <header class="hero">
+      <div class="eyebrow">For guests coming from out of town</div>
+      <h1 class="serif">Visiting Philadelphia</h1>
+      <p class="sub">A little help with getting here, getting around,<br>and what to do with the rest of your weekend.</p>
+      <div class="flourish"></div>
+    </header>
+
+    <!-- GETTING TO THE PARTY -->
+    <section>
+      <h2>Getting to the party</h2>
+      <p class="lede">
+        The party is at <strong id="vAddr">1220 North Front Street</strong>, in
+        <strong id="vHood">Fishtown</strong> — a short ride north-east of Center City.
+      </p>
+      <div class="rows">
+        <div class="row">
+          <div class="k">By train</div>
+          <div class="v">
+            The <strong>Front–Girard</strong> stop is right at the corner. It's on the
+            <strong>L</strong> (the Market–Frankford Line, the blue one — you may still
+            hear locals call it "the El"), about 10 minutes from Center City.
+          </div>
+        </div>
+        <div class="row">
+          <div class="k">By trolley or bus</div>
+          <div class="v">
+            The <strong>Route 15 trolley</strong> runs along Girard Avenue, and buses
+            <strong>5</strong> and <strong>25</strong> stop nearby.
+          </div>
+        </div>
+        <div class="row">
+          <div class="k">By car</div>
+          <div class="v">
+            Street parking only, and Fishtown gets busy on a Friday night. Carpool,
+            take transit, or use a rideshare if you can.
+          </div>
+        </div>
+      </div>
+      <div class="callout">
+        <div class="k">Remember</div>
+        <div class="v">
+          Please be inside by <strong>7:15 PM</strong>. If you're going to be later
+          than that, come after <strong>8:00 PM</strong>, once the surprise is over.
+        </div>
+      </div>
+    </section>
+
+    <!-- TRANSIT -->
+    <section>
+      <h2>Getting around &amp; paying for it</h2>
+      <p>
+        Philadelphia's transit is run by <strong>SEPTA</strong>. The good news for
+        visitors: <strong>you don't need to buy anything.</strong> Just tap a
+        contactless credit or debit card — or Apple&nbsp;Pay, Google&nbsp;Pay or
+        Samsung&nbsp;Pay on your phone — directly on the reader as you board.
+      </p>
+      <div class="rows">
+        <div class="row">
+          <div class="k">What a ride costs</div>
+          <div class="v">
+            About <strong>$2.90</strong> for a bus, subway or trolley ride, and your
+            first two transfers within 90 minutes are free.
+          </div>
+        </div>
+        <div class="row">
+          <div class="k">Traveling together</div>
+          <div class="v">
+            One contactless card or phone can pay for <strong>up to five people</strong> —
+            tap once per rider.
+          </div>
+        </div>
+        <div class="row">
+          <div class="k">From the airport (PHL)</div>
+          <div class="v">
+            The <strong>Airport Line</strong> regional rail train runs from every terminal
+            into Center City in around 25 minutes. It's <strong>$5</strong> if you tap or
+            use a SEPTA Key card, <strong>$7</strong> if you pay the conductor onboard.
+            Under-12s ride free with an adult.
+          </div>
+        </div>
+        <div class="row">
+          <div class="k">From 30th Street Station</div>
+          <div class="v">
+            If you're coming by Amtrak, you're already downtown. Hop on the
+            <strong>L</strong> heading east and you're 15 minutes from Fishtown.
+          </div>
+        </div>
+        <div class="row">
+          <div class="k">The two main lines</div>
+          <div class="v">
+            <strong>L</strong> (blue) runs east–west along Market Street.
+            <strong>B</strong> (orange, the Broad Street Line) runs north–south.
+            Almost everything you'll want is near one of them.
+          </div>
+        </div>
+      </div>
+      <p style="margin-top:1.2rem">
+        A SEPTA Key card exists too ($4.95, refunded if you register it), but for a
+        weekend visit tapping your own card is simpler.
+      </p>
+    </section>
+
+    <!-- THE GUIDE -->
+    <section class="wide">
+      <h2>Our guide to the city</h2>
+      <p class="lede" id="guideIntro">
+        Evan keeps a running guide to Philadelphia — what's on this week, where to eat,
+        parks worth a picnic, bookstores, farmers markets and more. It's built for a
+        phone, and it's the fastest way to find something good near you.
+      </p>
+
+      <div class="tour-wrap" id="tourWrap"></div>
+      <ol class="legend" id="tourLegend"></ol>
+
+      <a class="btn" id="guideBtn" target="_blank" rel="noopener">Open the guide</a>
+      <p class="btn-note" id="guideNote"></p>
+    </section>
+
+    <!-- NEIGHBOURHOODS -->
+    <section>
+      <h2>Neighborhoods worth your time</h2>
+      <ul class="plain">
+        <li><span><strong>Fishtown &amp; Northern Liberties</strong> — where the party is. Former
+          industrial blocks turned into the city's best stretch of bars, music venues,
+          coffee and pizza. Frankford Avenue is the spine.</span></li>
+        <li><span><strong>Old City</strong> — the postcard Philadelphia. Independence Hall, the
+          Liberty Bell, cobblestones and Elfreth's Alley, the oldest continuously
+          inhabited street in the country. Walkable from Fishtown along the river.</span></li>
+        <li><span><strong>Center City &amp; Rittenhouse Square</strong> — downtown. Rittenhouse is
+          the leafy square everyone sits in; the streets around it have the city's
+          most polished restaurants and shopping.</span></li>
+        <li><span><strong>South Philly &amp; East Passyunk</strong> — the Italian Market, cheesesteak
+          arguments, and along East Passyunk Avenue one of the best-value restaurant
+          rows anywhere in the city.</span></li>
+        <li><span><strong>University City</strong> — Penn and Drexel, across the river. Worth it for
+          Clark Park and the food trucks.</span></li>
+        <li><span><strong>Chinatown</strong> — right by the convention center, and open far later
+          than most of the city.</span></li>
+        <li><span><strong>The Parkway museums</strong> — the Art Museum steps (yes, those steps),
+          the Barnes Foundation and the Rodin, all in a row.</span></li>
+      </ul>
+    </section>
+
+    <!-- PRACTICAL -->
+    <section>
+      <h2>A few practical things</h2>
+      <ul class="plain">
+        <li><span><strong>The city is a grid</strong>, and a small one. Numbered streets run
+          north–south, tree-named streets (Chestnut, Walnut, Spruce, Pine) run
+          east–west. Broad Street is 14th. Most of Center City is walkable end to end
+          in half an hour.</span></li>
+        <li><span><strong>September evenings</strong> are usually mild but can turn cool once the
+          sun goes down, and the venue has outdoor space — bring a layer.</span></li>
+        <li><span><strong>It's BYOB</strong> at the party, and that's a Philadelphia institution:
+          a lot of the city's best restaurants are BYOB too, so it's worth asking
+          before you book.</span></li>
+        <li><span><strong>Tipping</strong> is 18–20% at restaurants and bars, as elsewhere in the US.</span></li>
+      </ul>
+    </section>
+
+    <footer>
+      <div>See you in September</div>
+      <div class="final-secret">Keep it between us</div>
+    </footer>
+
+  </div>
+
+  <script>
+    (function () {
+      const $ = (id) => document.getElementById(id);
+      const V = VISIT;
+      const T = V.tour;
+
+      $("vAddr").textContent = V.venueAddr;
+      $("vHood").textContent = V.venueHood;
+      $("guideBtn").href = V.guideUrl;
+      $("guideBtn").textContent = "Open " + V.guideName;
+      $("guideNote").textContent = V.guideUrl.replace(/^https?:\/\//, "");
+
+      // ---- Annotated walkthrough -------------------------------------
+      // Two layouts from one set of coordinates:
+      //   wide  — callout labels in gutters either side, joined by leader lines
+      //   narrow — numbered dots only, with the text as a legend underneath
+      const GUT = 640;      // width of each side gutter, in image pixels
+      const GAP = 34;       // gap between the image edge and a leader line
+
+      function esc(s) {
+        return String(s).replace(/[&<>"']/g, (c) => (
+          { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+      }
+
+      function renderTour(wide) {
+        const ox = wide ? GUT : 0;                       // image x-offset
+        const vbW = wide ? T.iw + GUT * 2 : T.iw;
+
+        let svg = `<svg class="tour-svg" viewBox="0 0 ${vbW} ${T.ih}" role="img" aria-label="${esc(T.alt)}">`;
+        svg += `<image href="${T.src}" x="${ox}" y="0" width="${T.iw}" height="${T.ih}"/>`;
+        svg += `<rect x="${ox}" y="0" width="${T.iw}" height="${T.ih}" fill="none" stroke="rgba(47,107,69,0.18)"/>`;
+
+        T.points.forEach((p) => {
+          const px = ox + p.x, py = p.y;
+
+          // A ring marks the control itself, and the number sits just beside
+          // it — so the callout never covers the thing it points at.
+          const left = p.side === "left";
+          const bx = px + (left ? -52 : 52);   // number badge
+          const by = py;
+
+          if (wide) {
+            const edgeX = left ? ox - GAP : ox + T.iw + GAP;
+            const labX  = left ? GUT - 90 : ox + T.iw + 90;
+            svg += `<path class="lead" d="M ${bx} ${by} L ${edgeX} ${by} L ${labX} ${p.ly}"/>`;
+
+            const anchor = left ? "end" : "start";
+            const tx = left ? GUT - 110 : ox + T.iw + 110;
+            svg += `<text class="ltitle" x="${tx}" y="${p.ly}" text-anchor="${anchor}" font-size="40">${esc(p.n + ". " + p.title)}</text>`;
+            p.lines.forEach((ln, i) => {
+              svg += `<text class="lbody" x="${tx}" y="${p.ly + 46 + i * 40}" text-anchor="${anchor}" font-size="34">${esc(ln)}</text>`;
+            });
+          }
+
+          svg += `<circle class="ring" cx="${px}" cy="${py}" r="30"/>`;
+          svg += `<circle class="dot" cx="${bx}" cy="${by}" r="21" stroke="#fff" stroke-width="4"/>`;
+          svg += `<text class="dotn" x="${bx}" y="${by + 9}" text-anchor="middle" font-size="25">${p.n}</text>`;
+        });
+
+        svg += `</svg>`;
+        $("tourWrap").innerHTML = svg;
+
+        // legend only when the labels aren't drawn beside the phone
+        $("tourLegend").innerHTML = wide ? "" : T.points.map((p) => `
+          <li>
+            <span class="num">${p.n}</span>
+            <span>
+              <span class="t">${esc(p.title)}</span>
+              <span class="d">${esc(p.lines.join(" "))}</span>
+            </span>
+          </li>`).join("");
+        $("tourLegend").hidden = wide;
+      }
+
+      const mq = window.matchMedia("(min-width: 1024px)");
+      renderTour(mq.matches);
+      (mq.addEventListener ? mq.addEventListener("change", (e) => renderTour(e.matches))
+                           : mq.addListener((e) => renderTour(e.matches)));
+    })();
+  </script>
+</body>
+</html>
