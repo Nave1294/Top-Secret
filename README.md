@@ -87,6 +87,38 @@ the form.
 4. Copy the Web app URL (it ends in `/exec`) and paste it into
    `CONFIG.rsvpEndpoint` in `invite.html`.
 
+### Optional: refuse duplicate rows
+
+The page sends each RSVP exactly once and blocks double-taps, so duplicates
+shouldn't occur. If you want the sheet to refuse them regardless, add an `id`
+column as the 8th header and use this `doPost` instead — every submission
+carries a unique `id`, and a repeat of one already present is ignored:
+
+```javascript
+function doPost(e) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);                 // serialise concurrent submissions
+  try {
+    const sheet = sheet_();
+    const d = JSON.parse(e.postData.contents);
+    if (d.id) {
+      const ids = sheet.getRange(1, 8, Math.max(sheet.getLastRow(), 1), 1)
+                       .getValues().flat();
+      if (ids.indexOf(d.id) !== -1) return json_({ ok: true, duplicate: true });
+    }
+    sheet.appendRow([
+      d.submittedAt, d.name, d.email,
+      d.attending, d.guests, d.dietary, d.message, d.id || ''
+    ]);
+    return json_({ ok: true });
+  } catch (err) {
+    return json_({ ok: false, error: String(err) });
+  } finally {
+    lock.releaseLock();
+  }
+}
+```
+
 ### If RSVPs aren't reaching the sheet
 
 **Open the `/exec` URL directly in a browser tab.** What you see identifies the

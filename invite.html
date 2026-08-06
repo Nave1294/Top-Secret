@@ -795,8 +795,10 @@
 
       // ---- Submit ----
       const form = $("rsvpForm");
+      let sending = false;
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
+        if (sending) return;          // a double-tap must not write a second row
         $("formErr").classList.remove("show");
 
         const name = $("name").value.trim();
@@ -811,7 +813,12 @@
           return;
         }
 
+        sending = true;
         const data = {
+          // a stable id per submission, so the script can drop a repeat if the
+          // same RSVP ever arrives twice (see README)
+          id: (crypto.randomUUID ? crypto.randomUUID()
+                                 : String(Date.now()) + Math.random().toString(16).slice(2)),
           name, email,
           attending: attendingEl.value,
           guests: attendingEl.value.startsWith("Joyfully") ? $("guests").value : "0",
@@ -826,64 +833,31 @@
 
         try {
           if (C.rsvpEndpoint) {
-            const payload = JSON.stringify(data);
-
-            // 1) Readable CORS post, so a successful send can be *verified*
-            //    rather than assumed. Timeboxed — a request that never settles
-            //    would otherwise leave the button stuck on "Sending…".
+            // EXACTLY ONE request. Writing a row is not idempotent, and a
+            // cross-origin POST that "fails" has usually still been delivered —
+            // the browser sends it and only blocks us from reading the reply.
+            // Retrying on an unreadable response therefore writes the row
+            // again, which is what produced duplicate entries. So: send once,
+            // confirm if the reply happens to be readable, and never re-send.
             let confirmed = false;
             try {
               const res = await withTimeout(
                 (signal) => fetch(C.rsvpEndpoint, {
                   method: "POST",
                   headers: { "Content-Type": "text/plain;charset=utf-8" },
-                  body: payload,
+                  body: JSON.stringify(data),
                   redirect: "follow",
                   signal,
-                }), 6000);
+                }), 15000);
               const text = await res.text();
               confirmed = res.ok && text.indexOf('"ok"') !== -1;
-            } catch (corsErr) {
+            } catch (err) {
+              // CORS blocked the reply, or it timed out. The row was very
+              // likely still written, so report it as sent-but-unconfirmed
+              // rather than sending a second copy.
               confirmed = false;
             }
-            if (confirmed) { showSuccess(data, true); return; }
-
-            // 2) Reply unreadable (CORS/redirect) or the attempt timed out, so
-            //    post opaquely. This is preferred over sendBeacon here because
-            //    it still *rejects* on a hard network failure — a dead endpoint
-            //    must surface as an error, not a false "sent".
-            let sent = false, stalled = false;
-            try {
-              await withTimeout(
-                (signal) => fetch(C.rsvpEndpoint, {
-                  method: "POST",
-                  mode: "no-cors",
-                  headers: { "Content-Type": "text/plain;charset=utf-8" },
-                  body: payload,
-                  signal,
-                }), 6000);
-              sent = true;
-            } catch (opaqueErr) {
-              // Timed out => request may well be in flight; anything else
-              // (DNS, refused, offline) is a genuine failure.
-              stalled = opaqueErr && opaqueErr.name === "AbortError";
-            }
-
-            // 3) Only a stall hands off to sendBeacon, which cannot hang but
-            //    also cannot report failure, so it must not mask a real error.
-            if (!sent && stalled && navigator.sendBeacon) {
-              try {
-                sent = navigator.sendBeacon(
-                  C.rsvpEndpoint,
-                  new Blob([payload], { type: "text/plain;charset=UTF-8" })
-                );
-              } catch (beaconErr) {
-                sent = false;
-              }
-            }
-
-            if (!sent) throw new Error("could not reach the RSVP endpoint");
-            showSuccess(data, false);
+            showSuccess(data, confirmed);
             return;
           } else {
             const subject = encodeURIComponent(`RSVP — ${data.name}`);
@@ -895,6 +869,7 @@
           }
           showSuccess(data);
         } catch (err) {
+          sending = false;
           btn.textContent = "Send RSVP";
           syncPledge();
           showErr("Something went wrong sending your RSVP. Please try again, or give us a call.");
@@ -918,7 +893,7 @@
         if (!confirmed) {
           $("successMsg").innerHTML +=
             `<br><span style="font-size:0.88rem">If you don't hear anything back ` +
-            `from us, please get in touch just in case.</span>`;
+            `from us nearer the time, do check in.</span>`;
         }
         $("registryWrap").hidden = !(accepting && C.registryUrl);
         $("successState").hidden = false;
