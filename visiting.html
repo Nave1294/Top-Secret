@@ -210,35 +210,121 @@
     }
     .callout .v { font-size: 1rem; line-height: 1.6; color: var(--text); }
 
-    /* ---------- Guide walkthrough ---------- */
-    .tour { margin: 2.2rem 0 0; }
-    .tour:first-of-type { margin-top: 1rem; }
-    .tour-cap {
-      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.16em;
-      text-transform: uppercase; color: var(--text-tertiary);
-      text-align: center; margin-bottom: 0.9rem;
-    }
-    .tour-wrap { margin: 0; }
-    .tour-svg { display: block; width: 100%; height: auto; }
-    .tour-svg .lead { stroke: var(--brass); stroke-width: 2; fill: none; vector-effect: non-scaling-stroke; }
-    .tour-svg .dot  { fill: var(--accent-dp); }
-    .tour-svg .ring { fill: none; stroke: var(--accent-dp); stroke-width: 3.5; opacity: 0.9; }
-    .tour-svg .dotn { fill: #fff; font-weight: 700; }
-    .tour-svg .ltitle { fill: var(--accent-dp); font-weight: 700; }
-    .tour-svg .lbody  { fill: #5c6a54; }
-    .tour-svg image { }
+    /* ---------- Guide walkthrough: swipeable carousel ---------- */
+    .carousel { margin-top: 1.6rem; }
 
-    /* numbered legend, used on narrow screens */
-    .legend { list-style: none; display: grid; gap: 1rem; margin-top: 1.6rem; }
-    .legend li { display: flex; gap: 0.85rem; align-items: flex-start; }
-    .legend .num {
-      flex: none; width: 26px; height: 26px; border-radius: 50%;
-      background: var(--accent-dp); color: #fff;
-      font-size: 0.78rem; font-weight: 700;
-      display: grid; place-items: center; margin-top: 0.1rem;
+    .slides {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
     }
-    .legend .t { font-weight: 600; color: var(--text); }
-    .legend .d { font-size: 0.95rem; line-height: 1.6; color: var(--text-secondary); margin-top: 0.15rem; }
+    .slides::-webkit-scrollbar { display: none; }
+
+    .slide { flex: 0 0 100%; scroll-snap-align: center; padding: 0 0.2rem; }
+
+    .slide-inner {
+      display: grid;
+      gap: 1.7rem;
+      justify-items: center;
+      align-content: start;
+    }
+    @media (min-width: 800px) {
+      .slide-inner {
+        grid-template-columns: auto minmax(0, 26rem);
+        justify-content: center;
+        align-items: center;
+        gap: 2.6rem;
+        justify-items: start;
+      }
+    }
+
+    /* the phone itself — deliberately small, with room around it.
+       The shot is padded either side so the numbers sit in a clear gutter
+       rather than on top of the controls they point at. */
+    .shot {
+      position: relative;
+      flex: none;
+      width: clamp(178px, 50vw, 236px);
+      padding: 0 30px;
+    }
+    .frame { position: relative; }
+    .frame img {
+      display: block; width: 100%; height: auto;
+      border-radius: 16px;
+      border: 1px solid var(--line-soft);
+      box-shadow: 0 1px 2px rgba(35,48,31,0.06), 0 18px 34px rgba(35,48,31,0.13);
+    }
+    /* soften the bottom of the crop so it doesn't end abruptly */
+    .frame::after {
+      content: ""; position: absolute; left: 1px; right: 1px; bottom: 1px;
+      height: 15%; pointer-events: none;
+      border-radius: 0 0 15px 15px;
+      background: linear-gradient(to bottom, rgba(246,242,230,0), var(--bg));
+    }
+
+    .mk {
+      position: absolute;
+      transform: translateY(-50%);
+      width: 21px; height: 21px; border-radius: 50%;
+      background: var(--accent-dp); color: #fff;
+      font-size: 0.68rem; font-weight: 700; line-height: 1;
+      display: grid; place-items: center;
+      box-shadow: 0 1px 3px rgba(35,48,31,0.25);
+    }
+    /* hairline tick pointing from the number to the screen */
+    .mk::after {
+      content: ""; position: absolute; top: 50%;
+      width: 16px; height: 1px; background: var(--brass);
+    }
+    .mk.left  { left: 0; }
+    .mk.left::after  { left: 100%; }
+    .mk.right { right: 0; }
+    .mk.right::after { right: 100%; }
+
+    .slide-title {
+      font-size: 1.12rem; font-weight: 600; color: var(--accent-dp);
+      margin-bottom: 1rem;
+    }
+    .feat { list-style: none; display: grid; gap: 0.9rem; }
+    .feat li { display: flex; gap: 0.75rem; align-items: flex-start; }
+    .feat .num {
+      flex: none; width: 21px; height: 21px; border-radius: 50%;
+      background: var(--accent-soft); color: var(--accent-dp);
+      font-size: 0.68rem; font-weight: 700; line-height: 1;
+      display: grid; place-items: center; margin-top: 0.15rem;
+    }
+    .feat .ft { font-size: 0.97rem; line-height: 1.5; color: var(--text-secondary); }
+    .feat .ft b { color: var(--text); font-weight: 600; }
+
+    /* controls */
+    .tour-nav {
+      display: flex; align-items: center; justify-content: center;
+      gap: 1.1rem; margin-top: 1.8rem;
+    }
+    .tnav {
+      width: 34px; height: 34px; border-radius: 50%;
+      border: 1px solid var(--line); background: none;
+      color: var(--accent-dp); font-size: 0.95rem; cursor: pointer;
+      display: grid; place-items: center;
+      transition: background 0.15s ease, opacity 0.15s ease;
+    }
+    .tnav:hover:not(:disabled) { background: var(--accent-soft); }
+    .tnav:disabled { opacity: 0.3; cursor: default; }
+    .dots { display: flex; gap: 0.45rem; }
+    .dot-btn {
+      width: 7px; height: 7px; border-radius: 50%; padding: 0;
+      border: none; background: var(--line); cursor: pointer;
+      transition: background 0.15s ease, transform 0.15s ease;
+    }
+    .dot-btn.on { background: var(--accent); transform: scale(1.35); }
+    .swipe-hint {
+      text-align: center; font-size: 0.78rem; color: var(--text-tertiary);
+      margin-top: 0.8rem; font-style: italic;
+    }
+    @media (min-width: 800px) { .swipe-hint { display: none; } }
 
     .btn {
       display: block; width: 100%; text-align: center;
@@ -384,89 +470,84 @@
       $("guideBtn").textContent = "Open " + V.guideName;
       $("guideNote").textContent = V.guideUrl.replace(/^https?:\/\//, "");
 
-      // ---- Annotated walkthrough -------------------------------------
-      // Two layouts from one set of coordinates:
-      //   wide   — callout labels in gutters either side, joined by leader lines
-      //   narrow — numbered rings only, with the text as a legend underneath
-      // Type sizes are derived from the viewBox width so that text renders at a
-      // readable size whatever the screenshot's dimensions are; hard-coded sizes
-      // shrink to nothing once a tall phone screenshot widens the viewBox.
-      function esc(s) {
-        return String(s).replace(/[&<>"']/g, (c) => (
+      // ---- Guide walkthrough ------------------------------------------
+      // A swipeable carousel: one app screen per slide, with small numbered
+      // markers on the screenshot and the matching list beside it. Markers are
+      // positioned as percentages of the screenshot's own pixel space, so they
+      // stay put at any display size — and using plain DOM elements rather than
+      // drawn leader lines keeps the text real, selectable and scalable.
+      function esc(t) {
+        return String(t).replace(/[&<>"']/g, (c) => (
           { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
       }
 
-      function tourSvg(T, wide) {
-        const GUT = wide ? Math.round(T.iw * 0.82) : 0;   // label gutter each side
-        const vbW = T.iw + GUT * 2;
-        const ox  = GUT;
-        const GAP = Math.round(T.iw * 0.035);
+      const tours = V.tours || [];
 
-        const fTitle = Math.round(vbW / 50);
-        const fBody  = Math.round(vbW / 60);
-        const lead   = Math.round(fBody * 1.25);
-        const ringR  = Math.round(T.iw / 26);
-        const badgeR = Math.round(T.iw / 34);
-        const badgeD = Math.round(T.iw / 13);
-        const fNum   = Math.round(T.iw / 30);
+      document.getElementById("tours").innerHTML = `
+        <div class="carousel">
+          <div class="slides" id="slides">
+            ${tours.map((T) => `
+              <div class="slide">
+                <div class="slide-inner">
+                  <div class="shot">
+                    <div class="frame">
+                      <img src="${T.src}" alt="${esc(T.alt)}" decoding="async">
+                    </div>
+                    ${T.points.map((p) => `
+                      <span class="mk ${p.side === "left" ? "left" : "right"}" aria-hidden="true"
+                            style="top:${(p.y / T.ih * 100).toFixed(2)}%">${p.n}</span>`).join("")}
+                  </div>
+                  <div class="slide-text">
+                    <div class="slide-title">${esc(T.caption)}</div>
+                    <ol class="feat">
+                      ${T.points.map((p) => `
+                        <li>
+                          <span class="num">${p.n}</span>
+                          <span class="ft"><b>${esc(p.title)}</b> — ${esc(p.lines.join(" "))}</span>
+                        </li>`).join("")}
+                    </ol>
+                  </div>
+                </div>
+              </div>`).join("")}
+          </div>
+          <div class="tour-nav">
+            <button class="tnav" id="tPrev" aria-label="Previous">&larr;</button>
+            <div class="dots" id="tDots">
+              ${tours.map((T, i) => `<button class="dot-btn${i ? "" : " on"}" data-i="${i}" aria-label="Go to ${esc(T.caption)}"></button>`).join("")}
+            </div>
+            <button class="tnav" id="tNext" aria-label="Next">&rarr;</button>
+          </div>
+          <p class="swipe-hint">swipe to see more</p>
+        </div>`;
 
-        let svg = `<svg class="tour-svg" viewBox="0 0 ${vbW} ${T.ih}" role="img" aria-label="${esc(T.alt)}">`;
-        svg += `<image href="${T.src}" x="${ox}" y="0" width="${T.iw}" height="${T.ih}"/>`;
-        svg += `<rect x="${ox}" y="0" width="${T.iw}" height="${T.ih}" fill="none" stroke="rgba(47,107,69,0.18)"/>`;
+      const slides = document.getElementById("slides");
+      const dots = [...document.querySelectorAll("#tDots .dot-btn")];
+      const prev = document.getElementById("tPrev");
+      const next = document.getElementById("tNext");
 
-        T.points.forEach((p) => {
-          const px = ox + p.x, py = p.y;
-          const left = p.side === "left";
-          // lift the badge diagonally so it clears wide pill-shaped controls
-          // instead of sitting on top of their text
-          let bx = px + (left ? -badgeD : badgeD);
-          const by = py - Math.round(badgeD * 0.62);
-          // narrow layout has no gutter, so keep the badge inside the artwork
-          // rather than letting it hang off the edge and get clipped
-          if (!wide) {
-            const pad = badgeR + 6;
-            bx = Math.min(Math.max(bx, ox + pad), ox + T.iw - pad);
-          }
+      const current = () => Math.round(slides.scrollLeft / slides.clientWidth);
+      const goTo = (i) => {
+        const n = Math.min(Math.max(i, 0), tours.length - 1);
+        slides.scrollTo({ left: n * slides.clientWidth, behavior: "smooth" });
+      };
 
-          if (wide) {
-            const edgeX = left ? ox - GAP : ox + T.iw + GAP;
-            const labX  = left ? GUT - GAP * 2 : ox + T.iw + GAP * 2;
-            svg += `<path class="lead" d="M ${bx} ${by} L ${edgeX} ${by} L ${labX} ${p.ly}"/>`;
-            const anchor = left ? "end" : "start";
-            const tx = left ? GUT - GAP * 2.6 : ox + T.iw + GAP * 2.6;
-            svg += `<text class="ltitle" x="${tx}" y="${p.ly}" text-anchor="${anchor}" font-size="${fTitle}">${esc(p.n + ". " + p.title)}</text>`;
-            p.lines.forEach((ln, i) => {
-              svg += `<text class="lbody" x="${tx}" y="${p.ly + lead * (i + 1.15)}" text-anchor="${anchor}" font-size="${fBody}">${esc(ln)}</text>`;
-            });
-          }
-
-          svg += `<circle class="ring" cx="${px}" cy="${py}" r="${ringR}"/>`;
-          svg += `<circle class="dot" cx="${bx}" cy="${by}" r="${badgeR}" stroke="#fff" stroke-width="${Math.round(badgeR/5)}"/>`;
-          svg += `<text class="dotn" x="${bx}" y="${by + fNum * 0.36}" text-anchor="middle" font-size="${fNum}">${p.n}</text>`;
-        });
-        return svg + `</svg>`;
+      function sync() {
+        const i = current();
+        dots.forEach((d, k) => d.classList.toggle("on", k === i));
+        prev.disabled = i <= 0;
+        next.disabled = i >= tours.length - 1;
       }
 
-      function renderTours(wide) {
-        document.getElementById("tours").innerHTML = (V.tours || []).map((T) => `
-          <figure class="tour">
-            <figcaption class="tour-cap">${esc(T.caption)}</figcaption>
-            <div class="tour-wrap">${tourSvg(T, wide)}</div>
-            ${wide ? "" : `<ol class="legend">` + T.points.map((p) => `
-              <li>
-                <span class="num">${p.n}</span>
-                <span>
-                  <span class="t">${esc(p.title)}</span>
-                  <span class="d">${esc(p.lines.join(" "))}</span>
-                </span>
-              </li>`).join("") + `</ol>`}
-          </figure>`).join("");
-      }
+      prev.addEventListener("click", () => goTo(current() - 1));
+      next.addEventListener("click", () => goTo(current() + 1));
+      dots.forEach((d) => d.addEventListener("click", () => goTo(+d.dataset.i)));
+      slides.addEventListener("scroll", () => {
+        clearTimeout(slides._t);
+        slides._t = setTimeout(sync, 90);
+      });
+      window.addEventListener("resize", sync);
+      sync();
 
-      const mq = window.matchMedia("(min-width: 1024px)");
-      renderTours(mq.matches);
-      (mq.addEventListener ? mq.addEventListener("change", (e) => renderTours(e.matches))
-                           : mq.addListener((e) => renderTours(e.matches)));
     })();
   </script>
 </body>
