@@ -159,6 +159,28 @@
     /* ---------- Hero ---------- */
     .hero { text-align: center; margin-bottom: 2.6rem; }
 
+    /* Small shortcut for anyone who just wants to reply. Deliberately lighter
+       than the Send RSVP button so it reads as a shortcut, not the submit. */
+    .jump-rsvp {
+      display: inline-flex; align-items: center; gap: 0.45rem;
+      margin-top: 1.6rem;
+      padding: 0.42rem 1.05rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--accent-soft);
+      color: var(--accent-dp);
+      font-size: 0.74rem; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      text-decoration: none;
+      transition: background 0.15s ease, transform 0.15s ease;
+    }
+    .jump-rsvp:hover { background: #d6e5cf; transform: translateY(-1px); }
+    .jump-rsvp .dn { transition: transform 0.2s ease; }
+    .jump-rsvp:hover .dn { transform: translateY(2px); }
+
+    /* the sticky confidential bar would otherwise cover the heading we jump to */
+    #rsvpCard { scroll-margin-top: 4.5rem; }
+
     .eyebrow {
       font-size: 0.7rem;
       font-weight: 600;
@@ -466,6 +488,8 @@
         <div class="cd-sep">:</div>
         <div><div class="cd-num" id="cdS">–</div><div class="cd-lbl">Sec</div></div>
       </div>
+
+      <a class="jump-rsvp" href="#rsvpCard">Skip to RSVP <span class="dn">&darr;</span></a>
     </header>
 
     <div class="band band-3">
