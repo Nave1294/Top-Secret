@@ -161,9 +161,10 @@
 
     /* Small shortcut for anyone who just wants to reply. Deliberately lighter
        than the Send RSVP button so it reads as a shortcut, not the submit. */
+    .jump-wrap { text-align: center; }
     .jump-rsvp {
       display: inline-flex; align-items: center; gap: 0.45rem;
-      margin-top: 1.6rem;
+      margin-top: 1.7rem;
       padding: 0.42rem 1.05rem;
       border-radius: 999px;
       border: 1px solid var(--line);
@@ -488,8 +489,6 @@
         <div class="cd-sep">:</div>
         <div><div class="cd-num" id="cdS">–</div><div class="cd-lbl">Sec</div></div>
       </div>
-
-      <a class="jump-rsvp" href="#rsvpCard">Skip to RSVP <span class="dn">&darr;</span></a>
     </header>
 
     <div class="band band-3">
@@ -515,6 +514,10 @@
       <div class="arrival">
         <div class="k">Most important</div>
         <div class="v" id="arrivalV">—</div>
+      </div>
+
+      <div class="jump-wrap">
+        <a class="jump-rsvp" href="#rsvpCard">Skip to RSVP <span class="dn">&darr;</span></a>
       </div>
     </section>
 
