@@ -120,6 +120,7 @@
       section.wide > h2,
       section.wide > p,
       section.wide > .btn,
+      section.wide > .guide-btn-wrap,
       section.wide > .btn-note { max-width: 40rem; margin-left: auto; margin-right: auto; }
     }
 
@@ -326,15 +327,28 @@
     }
     @media (min-width: 800px) { .swipe-hint { display: none; } }
 
-    .btn {
-      display: block; width: 100%; text-align: center;
-      margin-top: 1.8rem;
-      font-size: 1rem; font-weight: 700; letter-spacing: 0.03em;
-      text-transform: uppercase; color: #fff; background: var(--accent-dp);
-      border-radius: 3px; padding: 0.95rem; text-decoration: none;
-      transition: background 0.15s ease;
+    /* The guide link is deliberately unlike the solid rectangles used
+       elsewhere on the site: a brass-outlined pill that reads as a doorway
+       out to something else rather than a form action. */
+    .guide-btn {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      padding: 0.72rem 1.5rem;
+      border: 1.5px solid var(--brass);
+      border-radius: 999px;
+      background: #fffdf6;
+      color: var(--accent-dp);
+      font-size: 0.95rem; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      text-decoration: none;
+      transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
     }
-    .btn:hover { background: var(--accent); }
+    .guide-btn .arw { transition: transform 0.2s ease; color: var(--brass); }
+    .guide-btn:hover { background: #fffdf6; border-color: var(--accent); transform: translateY(-1px); }
+    .guide-btn:hover .arw { transform: translateX(4px); color: var(--accent); }
+
+    .guide-btn-wrap { text-align: center; margin-top: 1.9rem; }
+    .hero .guide-btn { margin-top: 1.4rem; }
+
     .btn-note { text-align: center; font-size: 0.85rem; color: var(--text-tertiary); margin-top: 0.8rem; }
 
     a.inline { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-soft); }
@@ -361,6 +375,7 @@
       <div class="eyebrow">For guests coming from out of town</div>
       <h1 class="serif">Visiting Philadelphia</h1>
       <p class="sub">Getting here, getting around, and what to do<br>with the rest of the weekend.</p>
+      <a class="guide-btn js-guide" target="_blank" rel="noopener"></a>
       <div class="flourish"></div>
     </header>
 
@@ -417,7 +432,9 @@
 
       <div id="tours"></div>
 
-      <a class="btn" id="guideBtn" target="_blank" rel="noopener">Open the guide</a>
+      <div class="guide-btn-wrap">
+        <a class="guide-btn js-guide" target="_blank" rel="noopener"></a>
+      </div>
       <p class="btn-note" id="guideNote"></p>
     </section>
 
@@ -466,8 +483,10 @@
 
       $("vAddr").textContent = V.venueAddr;
       $("vHood").textContent = V.venueHood;
-      $("guideBtn").href = V.guideUrl;
-      $("guideBtn").textContent = "Open " + V.guideName;
+      document.querySelectorAll(".js-guide").forEach((a) => {
+        a.href = V.guideUrl;
+        a.innerHTML = "Open " + V.guideName + ' <span class="arw">&rarr;</span>';
+      });
       $("guideNote").textContent = V.guideUrl.replace(/^https?:\/\//, "");
 
       // ---- Guide walkthrough ------------------------------------------
